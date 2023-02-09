@@ -2,17 +2,23 @@ project:
   type: website
 
 website:
-  title: "blog-template"
+  title: "Journeyman to Master"
+  google-analytics: "UA-85090346-1"
+  twitter-card: true
+  site-url: https://www.zduey.github.io
+  description: "Ramblings of a journeyman forever seeking to become a master"
   navbar:
     right:
       - about.qmd
       - icon: github
-        href: https://github.com/
+        href: https://github.com/zduey
       - icon: twitter
-        href: https://twitter.com
+        href: https://twitter.com/z_duey
+      - icon: rss
+        href: index.xml
 format:
   html:
-    theme: cosmo
+    theme: flatly
     css: styles.css
 
 
