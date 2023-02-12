@@ -2,18 +2,41 @@
 title: "About"
 image: profile.jpg
 about:
-  template: jolla
+  template: broadside
   links:
     - icon: twitter
       text: Twitter
-      href: https://twitter.com
+      href: https://twitter.com/z_duey
     - icon: linkedin
       text: LinkedIn
-      href: https://linkedin.com
+      href: https://linkedin.com/in/zachduey
     - icon: github
       text: Github
-      href: https://github.com
-
+      href: https://github.com/zduey
 ---
+I am a father, husband, and data scientist, currently residing in Philadelphia,
+PA. I am currently the Lead Data Scientist at [Activate
+Care](https://www.activatecare.com/) (October 2022). 
 
-About this blog
+Professionally, I have a dual passion for software engineering and applied
+statistics with a particular love for all things related to causal inference.
+At the end of the day, I am most excited by professional and educational
+opportunities that give me the opportunity to grow in these areas. I completed
+a master’s degree in computer science at the University of Pennsylvania (May
+2022) and received my undergraduate education at American University where I
+majored in Mathematics & Economics and Philosophy (May 2014).
+
+Most of my time outside of work is spent with family, friends, and being
+involved in our local church community ([Citylight Church Center
+City](https://citylightcentercity.com/)). Since high school, I have cultivated
+an interest in Christian apologetics, motivated by 1 Peter 3:15-16:
+
+>"but in your hearts honor Christ the Lord as holy, always being prepared to
+make a defense to anyone who asks you for a reason for the hope that is in you;
+yet do it with gentleness and respect”
+
+I love to cook, make pour-over coffee, and play sports. I was a competitive
+gymnast for 10 years, dove for a year in high school, and then played ultimate
+frisbee in college and for a bit afterwards. At this point, I restrict myself
+to tennis, jogging, and calisthenics to avoid what seemed to be a constant
+stream of injuries.
