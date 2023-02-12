@@ -1,6 +1,17 @@
 [
   {
     "listing": "/blog.html",
-    "items": []
+    "items": [
+      "/posts/courage-to-ask.html",
+      "/posts/econometrics-for-data-scientists.html",
+      "/posts/intro-bayesian-statistics-presentation.html",
+      "/posts/2017-retrospective-2018-goals.html",
+      "/posts/ssh-server-on-home-computer.html",
+      "/posts/app-deployment-with-heroku.html",
+      "/posts/streaming-stock-data-with-bokeh.html",
+      "/posts/2016-retrospective-2017-goals.html",
+      "/posts/funnel-method.html",
+      "/posts/10000-lines-of-code.html"
+    ]
   }
 ]

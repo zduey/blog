@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Zach Duey">
+<meta name="dcterms.date" content="2017-08-26">
+<meta name="description" content="A tutorial for setting up a home computer to be accessed remotely via SSH.">
+
+<title>Zach Duey - Setting Up SSH On A Home Computer</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+<script type="text/javascript">
+
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-85090346-1', 'auto');
+
+ga('send', {
+  hitType: 'pageview',
+  'anonymizeIp': true,
+});
+</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+<meta name="twitter:title" content="Zach Duey - Setting Up SSH On A Home Computer">
+<meta name="twitter:description" content="A tutorial for setting up a home computer to be accessed remotely via SSH.">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Zach Duey</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../blog.html">
+ <span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-projects" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Projects</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-projects">    
+        <li>
+    <a class="dropdown-item" href="https://zduey.github.io/revisiting-shapley-values">
+ <span class="dropdown-text">Master’s Thesis</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/zduey"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/z_duey"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://linkedin.com/in/zachduey"><i class="bi bi-linkedin" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../index.xml"><i class="bi bi-rss" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Setting Up SSH On A Home Computer</h1>
+                  <div>
+        <div class="description">
+          A tutorial for setting up a home computer to be accessed remotely via SSH.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">tutorial</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Zach Duey </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">August 26, 2017</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<p>tl;dr – The guide I wish I had when setting up an SSH server on a home pc</p>
+<section id="background" class="level2">
+<h2 class="anchored" data-anchor-id="background">Background</h2>
+<p>Around 18 months ago, I built a desktop computer so I would have a little more firepower at my fingertips when I needed it. My hope was to avoid having to pay for cloud computing services during Kaggle competitions and other side projects. Early on, I realized that it would be nice to be able to use this machine remotely, so I found a few resources for setting up your home PC as an SSH server. However, I was not able to find a single resource that provided enough background information that I was not just copy/pasting the commands.</p>
+<p>Although no advanced knowledge of any particular topic is required to set up your own SSH server, there are many concepts to get your head around. I will explain more detail below, but the short version is that an SSH server is a process running on your computer that waits for outside computers to request access via a specific port, authenticates that user, and then allows access to the computer. If half of those terms do not make sense, do not worry. I was in the same position when I first tried getting set up. Here is a quick list of the concepts/terms that we will cover:</p>
+<ol type="1">
+<li>Server</li>
+<li>SSH</li>
+<li>Network Address Translation</li>
+<li>Public/Private IP Addresses</li>
+<li>Ports</li>
+<li>Port Forwarding</li>
+<li>Public/Private Key Authentication</li>
+</ol>
+<p>I use Ubuntu 14.04 LTS as my operating system, however, the steps will be similar on any unix-like platform. To follow along, be sure to have access to the following:</p>
+<ol type="1">
+<li>The unix-based computer that will host the SSH server</li>
+<li>A different computer to test the remote connection to the server</li>
+<li>Access to a different network than the one to which your host machine is connected (optional, but recommended)</li>
+</ol>
+<p>For the purposes of this guide, ‘host’ will indicate the computer running the SSH server, while ‘client’ will refer to any computer requesting access to the host. At one point in this guide, your host computer will also be a client.</p>
+</section>
+<section id="initial-setup" class="level2">
+<h2 class="anchored" data-anchor-id="initial-setup">Initial Setup</h2>
+<p>SSH stands for “secure shell” and is what will allow us to establish a secure connection between two computers. Our end goal is to be able to issue commands from a client machine that are executed by the host machine. For a more thorough coverage of SSH, take a look at <a href="https://www.digitalocean.com/community/tutorials/ssh-essentials-working-with-ssh-servers-clients-and-keys">this great guide by Digital Ocean</a>.</p>
+<p>The term “server” is often used a bit loosely. Here, we mean by the term is a process running on a computer that is tasked with managing access to a computer’s resources over a network. We will be installing the openssh-server application, which will allow us to run an SSH server on our machine that will handle requests for access to the host computer from other devices.</p>
+<p>Start by updating your system packages:</p>
+<pre><code>sudo apt-get upgrade</code></pre>
+<p>Install the openssh-server application and client. You should also install the openssh-client on machines that will be used as clients.</p>
+<pre><code>sudo apt-get install openssh-client
+sudo apt-get install openssh-server</code></pre>
+<p>You should now have an SSH server process running on your machine. Check with the following:</p>
+<pre><code>ps -A | grep sshd</code></pre>
+<p>You should see something like:</p>
+<pre><code>[number] ?  00:00:00 sshd</code></pre>
+<p>For those of you who copy/pasted the above command (something I have certainly been guilty of), you will learn a lot more by taking the time to look up any commands you do not recognize. If you are new (or just want a refresher on) to shell commands, check out the <a href="https://www.codecademy.com/learn/learn-the-command-line">Learn the Command Line</a> course from Code Academy.</p>
+<p>Check that you can ‘login’ to the host machine from the host machine, i.e.&nbsp;your host machine is also the client in this case.</p>
+<pre><code>ssh localhost</code></pre>
+<p>Move around a little in the shell (cd, pwd, etc.) to make sure that everything works and then type “exit” to end the session.</p>
+<p>Next, we will connect using a true ‘client’ machine. For this to work, make sure that your client machine is on the same network as the server. If you are following along from your home or work wifi network, you should be all set.</p>
+<p>Start by determining the IP address of your host machine by listing information about the network interfaces on your machine.</p>
+<pre><code>ifconfig</code></pre>
+<p>You should see entries for ‘eth0’ and ‘lo’, as well as some other entries if you have installed a wireless card on your desktop. If your host machine is connected to the network via an ethernet cable, use the address associated with the “eth[number]” entry. If you are connected via wifi, use the “wlan[number]” entry. If you want to see just the list of IP addresses for the devices, you can use:</p>
+<pre><code>ifconfig | grep "inet addr"</code></pre>
+<p>Next, try logging in from the client machine using that IP address:</p>
+<pre><code>ssh username@X.X.X.X</code></pre>
+<p>You should be prompted for the password of the account you used in your ssh command. For security reasons, the characters will not be displayed in the shell. If successful, you should see a “Welcome to Ubuntu X.X.X” message or something similar depending on your OS.</p>
+<p>This is a bit more useful than our previous test, but it still does not solve our initial problem of being able to access the machine from outside the same network. Go ahead and try it out if you have the ability to connect your client machine to a different network than your host machine.</p>
+<p>A quick option if you have a little data to spare on your cellular plan is to turn on tethering and connect your client machine to that network, while your host machine remains on the other network. Once you are on this separate network, try that ssh command again:</p>
+<pre><code>ssh username@X.X.X.X</code></pre>
+<p>Most likely, you will notice that the command hangs and then eventually times out. Go ahead and disconnect from this other network and we will finish with the last step of the setup. But first, we will take a second to cover a few more background concepts that will make this next step clearer.</p>
+</section>
+<section id="nat-and-publicprivate-ip-addresses" class="level2">
+<h2 class="anchored" data-anchor-id="nat-and-publicprivate-ip-addresses">NAT and Public/Private IP Addresses</h2>
+<p>It may be surprising, but the internet is only able to handle a finite number of users being on line at a single time. In a world where almost every electronic device has access to the internet, it is possible to get close to the theoretical maximum. In order to circumvent this problem, Network Address Translation (NAT) was created to allow a set of devices on a private network to share a single IP address. On the private network, each device receives its own private IP address. For example, the IP address you found above with “ifconfig” is the private IP address of your computer on your local network.</p>
+<p>Any time you acess a web page from one of the devices on your home network, the request is routed (hence the term router) through an NAT device, which translates the private IP address into a request using the public IP address assigned to the router by your ISP. This is the IP address you will ultimately need to use when connecting from outside your local network. Go ahead and determine your public IP address by going to www.whatsmyip.org. You should see something in the form of XX.XX.XXX.XXX. You may be tempted to try that ssh command again with this address, but in all likelihood it still will not work.</p>
+<p>Although NAT solves the device-limit problem, it adds a layer of complexity to setting up a home computer to accept SSH connections. When a client machine sends a request to connect to the public IP address, your router does not know which of the devices on your private network the request is meant for. Luckily, the solution is usually straightforward and involves setting up ‘port fowarding’ on your router. Bear with me as we continue down the terminology rabbit hole and go over ports. Feel free to skip ahead if you are already familiar with the concept.</p>
+</section>
+<section id="ports-and-port-fowarding" class="level2">
+<h2 class="anchored" data-anchor-id="ports-and-port-fowarding">Ports and Port Fowarding</h2>
+<p>Although computers have a variety of physical ports that most people are familiar with (USB, HDMI, VGA, etc.), the ports I am referring to here are networking ports and are logical, not physical. When you start a server (i.e. the SSH server you just set up in the previous steps), you bind it to one of these logical ports. The process then ‘listens’ for messages sent to this port by other programs (either internal or external). Each port has a number and some of these numbers are reserved for use by specific types of services. As an example, servers handling HTTP request use port 80 as the default. When you access a web page via a URL, you are really sending a message to an HTTP server at port 80 for a specific resource (web page or other content) that is managed by that service. In general, port 22 is used for the SSH service.</p>
+<p>In this context, port forwarding means telling your router to forward requests made using a specific port to a particular device on your private network. It is then the responsibility of that device to handle the request. You may be wondering: why don’t just send the request directly to the computer via the private IP address and avoid all of this port forwarding nonsense? Like the name implies, these IP addresses are private, so once you are on a different network, the internet-at-large has no knowledge of this private IP address and therefore the request to connect will fail.</p>
+<p>Every router is a little bit different when it comes to setting up port forwarding. This may sound like a cop out, but honestly, your best bet is to look up directions for your specific router. For example, here are instructions for an <a href="https://www.att.com/esupport/article.html#!/u-verse-high-speed-internet/KM1010280">AT&amp;T router</a> and <a href="https://www.xfinity.com/support/internet/port-forwarding-xfinity-wireless-gateway/">Comcast XFINITY</a>. In general, you will need to take the following actions:</p>
+<ol type="1">
+<li>Log in to your router’s admin page</li>
+<li>Navgiate to the page for adding a service (SSH is usually one of the default options)</li>
+<li>Select or enter the port number where requests will be made (22 by default for SSH)</li>
+<li>Select or input the private IP address you found earlier of your host machine</li>
+<li>Save the updated settings</li>
+</ol>
+<p>Now, we can repeat our ssh command using the public IP address and that request should be redirected by our router to our host machine. Connect back to that outside network and try:</p>
+<pre><code>ssh username@[public IP address]</code></pre>
+<p>You should again be prompted for your host machine password and then admitted access.</p>
+</section>
+<section id="more-secure-ssh-server-configuration" class="level2">
+<h2 class="anchored" data-anchor-id="more-secure-ssh-server-configuration">More Secure SSH Server Configuration</h2>
+<p>For this final section, we will be making some changes to the configuration settings for our SSH server. On Ubuntu, these settings are located in the /etc/ssh/sshd_config file. A couple of quick notes:</p>
+<ul>
+<li>To edit this file, you will need to open it as a super user</li>
+<li>Any time you update the config settings, you need to restart the SSH server to have them take effect</li>
+</ul>
+<pre><code>sudo restart ssh</code></pre>
+<p>When a running SSH server receives a request over port 22 (or whatever port it is bound to), it must check that the requesting user has permission to access the computer. This can be done with a password, however, it is considered much more secure to use public key authentication. Public key cryptography works by having a user generate a public key that can be given to anyone, while keeping the private key hidden. Authentication works by using the public key (made available by the user to the process doing the authentication) to verify that the requesting user (whose request to access the service is encrypted using their private key) matches a user who is allowed access. Once this connection is established, more efficient methods of data encryption/decryption are used to transfer the keystrokes and other information using this secure connection.</p>
+<p>If you have not already done so, you will need to generate a public/private key pair to use when logging in to your machine. Note that you will need to do this on any device you wish to be allowed access to your SSH server. There are a number of good guides out there for doing this, so to avoid re-inventing the wheel, I suggest following the <a href="https://help.ubuntu.com/community/SSH/OpenSSH/Keys#keys-with-specific-commands">Ubuntu Instructions</a></p>
+<p>Now that you have those keys ready, we will enable public key authentication on the SSH server. Open the sshd_config file as a super user for the next set of steps and start by changing:</p>
+<pre><code>PasswordAuthentication yes</code></pre>
+<p>to</p>
+<pre><code>PasswordAuthentication no</code></pre>
+<p>This will prevent users from being able to access the server with a password, which will help against a brute force attack that attempts to guess the password. Another recommendation is to change the port that the SSH service uses. Within your config file, comment out the existing port specification and choose a new port.</p>
+<pre><code># Port 22
+Port [new port number]</code></pre>
+<p>Remember, based on an earlier step, your router will still attempt to send SSH requests to port 22, so you will need to go back into your router’s config settings and update the port number for the SSH service. If you are on a machine with multiple user accounts, you can also limit which users are allowed to log in through SSH. At the bottom of the config file add:</p>
+<pre><code>AllowUsers [user1] [user 2] ...</code></pre>
+<p>You can also deny specific users and add/deny groups, however, it is unlikely that you will need to do this for a home computer.</p>
+<p>Next, disable root login via SSH by changing:</p>
+<pre><code>PermitRootLogin without-password</code></pre>
+<p>to</p>
+<pre><code>PermitRootLogin No</code></pre>
+<p>Beyond disabling password logins, you can also prevent brute force attacks by limiting the number of concurrent connections to the SSH server. For a home computer, keep this number low by changing:</p>
+<pre><code>#MaxStartups 10:30:60</code></pre>
+<p>to</p>
+<pre><code>MaxStartups 3</code></pre>
+<p>With an SSH connection, you can tunnel graphical windows. If you do not plan to use this ability,then go ahead and shut it off by changing</p>
+<pre><code>X11Forwarding yes</code></pre>
+<p>to</p>
+<pre><code>X11Forwarding no</code></pre>
+<p>In addition to forwarding windows, you can also forward ports via SSH. For example, if you had a web server running on port 80 on your host machine, you could forward that port to a port on your client machine. This can be handy, but if you do not plan on using this ability, then disable it until you have a need for it since it can be used maliciously.</p>
+<pre><code>AllowTcpForwarding no</code></pre>
+<p>There are a bunch of other settings in the ssh_config file, but I do not recommend changing the defaults unless you have a good reason to do so. While the suggested changes will add some security to your server, there are many additional ways to add security. In fact, they probably deserve a post of their own, but I will save that for another time.</p>
+<p>Thanks for taking the time to read through this and please feel free to let me know if anything is unclear.</p>
+</section>
+<section id="external-resources" class="level2">
+<h2 class="anchored" data-anchor-id="external-resources">External Resources</h2>
+<ul>
+<li><a href="https://www.digitalocean.com/community/tutorials/ssh-essentials-working-with-ssh-servers-clients-and-keys">Digital Ocean SSH Essentials</a></li>
+<li><a href="https://help.ubuntu.com/community/SSH/OpenSSH/Configuring">Ubuntu SSH Configuration Guide</a></li>
+<li><a href="https://help.ubuntu.com/community/SSH/OpenSSH/Keys#keys-with-specific-commands">Ubuntu Public/Private Keys Guide</a></li>
+<li><a href="https://www.maketecheasier.com/secure-ssh-server-ubuntu/">Secure SSH Configuration</a></li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">Copyright 2023, Zach Duey</div>   
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/zduey">
+      <i class="bi bi-github" role="img">
+</i> 
+    </a>
+  </li>  
+    <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/z_duey">
+      <i class="bi bi-twitter" role="img">
+</i> 
+    </a>
+  </li>  
+    <li class="nav-item compact">
+    <a class="nav-link" href="https://linkedin.com/in/zachduey">
+      <i class="bi bi-linkedin" role="img">
+</i> 
+    </a>
+  </li>  
+    <li class="nav-item compact">
+    <a class="nav-link" href="../index.xml">
+      <i class="bi bi-rss" role="img">
+</i> 
+    </a>
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
+
+
+
+</body></html>

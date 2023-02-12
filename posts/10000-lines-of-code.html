@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Zach Duey">
+<meta name="dcterms.date" content="2016-10-31">
+<meta name="description" content="A short reflection on software development after writing my first 10,000 lines of code">
+
+<title>Zach Duey - 10,000 Lines of Code</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+<script type="text/javascript">
+
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-85090346-1', 'auto');
+
+ga('send', {
+  hitType: 'pageview',
+  'anonymizeIp': true,
+});
+</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+<meta name="twitter:title" content="Zach Duey - 10,000 Lines of Code">
+<meta name="twitter:description" content="A short reflection on software development after writing my first 10,000 lines of code">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Zach Duey</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../blog.html">
+ <span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-projects" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Projects</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-projects">    
+        <li>
+    <a class="dropdown-item" href="https://zduey.github.io/revisiting-shapley-values">
+ <span class="dropdown-text">Master’s Thesis</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/zduey"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/z_duey"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://linkedin.com/in/zachduey"><i class="bi bi-linkedin" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../index.xml"><i class="bi bi-rss" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">10,000 Lines of Code</h1>
+                  <div>
+        <div class="description">
+          A short reflection on software development after writing my first 10,000 lines of code
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">software development</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Zach Duey </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">October 31, 2016</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<p>Malcolm Gladwell has this now-famous metric about how 10,000 hours of practice in a sport/trade/etc. is roughly the amount of time required to become a master in that area. Under a certain set of assumptions, this is about 5 years of full-time work. I’ve been working as a pseudo-journeyman programmer for about a year now, so I’m on my way, but I want to establish another somewhat arbitrary milestone: writing your first 10,000 lines of code.</p>
+<p>Every Friday, I spend about 20 minutes taking stock of what I did over the course of the past week, update a running document with high-level summaries of projects I’ve worked on or am currently working on, and make a general plan for the week ahead. As part of that routine, I also do a quick linecount of the code I’ve written for various ad-hoc projects, data analytics research, and the small application I build and maintain at work. A few weeks ago this linecount breached the 10,000 mark. Thanks to the publicity-engine and PR aptitude of Gladwell, an immediate bell began going off in my head. My first thought was a bit of shock that in such a short time (around 9 months) I had managed to build up that much code. My second thought turned into a long silent trip down memory lane as I started to reflect on how much I learned – sometimes the hard way – in the course of writing those 10,000 lines.</p>
+<section id="start-small-think-big-then-get-back-to-starting-small-i-am-pretty-sure" class="level3">
+<h3 class="anchored" data-anchor-id="start-small-think-big-then-get-back-to-starting-small-i-am-pretty-sure">Start small, think big, then get back to starting small I am pretty sure</h3>
+<p>that I’ve seen a T-shirt, coffee mug, or meme somewhere with the phrase “Think big, start small”, or some derivation thereof. I want to amend that slightly by adding “start small” to the front of that advice. Perhaps it’s only a certain type of personality, but if you start by thinking big, it can get overwhelming how distant that end goal may be. The best way I’ve found to get around this is to start a project by actually writing some code. Anyone who has had to write papers in school knows the fear of a blinking cursor as you start an essay. Likewise, every seasoned programmer knows that a blank text editor is one of the scarier things you’ll face. However, the second a little code is on the page, things tend to snowball ahead. Now, if you forget to step back and go to step 2 (think big), it’s easy to get caught in that snowballing code base and not think about whether or not where the code is currently going is in fact where you want it to go. After re-acquainting yourself with the bigger picture, it’s time to get back to the details and get that snowball rolling again. Rinse and repeat.</p>
+</section>
+<section id="read-good-code-ever-wondered-why-the-younger-siblings-always-seem-to-be-the" class="level3">
+<h3 class="anchored" data-anchor-id="read-good-code-ever-wondered-why-the-younger-siblings-always-seem-to-be-the">Read good code Ever wondered why the younger siblings always seem to be the</h3>
+<p>‘better’ athletes? There is a strong case to be made that it is because they are constantly playing-up, i.e.&nbsp;being mercilessly defeated (or not) by older siblings. This sort of constant challenge pushes them in ways you simply cannot get if you are surrounded by people of similar abilities. I think the same holds true professionally. But, if you are lacking mentorship, turning to the vast swaths of open-source code bases available online can be a fruitful second-best. Digesting that well-written code and borrowing from not only the code style but also the techniques can yield great benefit in your own projects.</p>
+</section>
+<section id="develop-good-coding-habits-early-sadly-nothing-new-here-again.-bad-habits" class="level3">
+<h3 class="anchored" data-anchor-id="develop-good-coding-habits-early-sadly-nothing-new-here-again.-bad-habits">Develop good coding habits early Sadly, nothing new here again. Bad habits</h3>
+<p>are hard to break. I remember reading this advice relatively early on in my transition to pseudo-journeyman and it’s kept me honest and relatively anal about code style ever since. Not to mention, once you’ve written a significant amount of code with those bad habits shining through, it is a lot more painful to re-write than if you started with at least some good habits. No idea what constitute ‘good’ coding habits? Here are a couple of resources I’ve found incredibly useful as I’ve started trying to develop my own:</p>
+<ol type="1">
+<li><a href="https://www.amazon.com/Clean-Code-Handbook-Software-Craftsmanship/dp/0132350882/ref=sr_1_1?ie=UTF8&amp;qid=1477935335&amp;sr=8-1&amp;keywords=clean+code">Clean Code</a></li>
+<li><a href="https://www.amazon.com/Code-Complete-Practical-Handbook-Construction/dp/0735619670/ref=sr_1_1?ie=UTF8&amp;qid=1477935229&amp;sr=8-1&amp;keywords=code+complete">Code Complete</a></li>
+<li><a href="https://www.amazon.com/Pragmatic-Programmer-Journeyman-Master/dp/020161622X/ref=sr_1_4?ie=UTF8&amp;qid=1477935335&amp;sr=8-4&amp;keywords=clean+code">Pragmatic Programmer</a></li>
+<li><a href="http://docs.python-guide.org/en/latest/">Hitchhiker’s Guide to Python</a></li>
+</ol>
+</section>
+<section id="understand-why-code-works-not-just-that-it-works-it-is-all-too-easy" class="level3">
+<h3 class="anchored" data-anchor-id="understand-why-code-works-not-just-that-it-works-it-is-all-too-easy">Understand <em>why</em> code works, not just <strong>that</strong> it works It is all too easy</h3>
+<p>to get caught up in the excitement of a snowballing code base. This is especially true when writing code in a high-level language like Python where you have to do much less thinking about the nuts and bolts of a program than if you are writing at a lower level in C/C++ or even a language that enforces OOP like Java. However, at some point, there comes a time where you end up needing to know why something <em>worked</em> and not just that it works. If you have to go back to square one and try to understand your program from the ground up because you got too caught up in adding new features/enhancements/whatever, it is much more painful than if you have been building upon your knowledge of <em>why</em> it works the whole time. In short, if you ever find yourself saying “Wow… I’m not sure how that just worked, but that’s what I wanted it to do.” then stop right there and take the time to understand what is going on. In the best case scenario, the code is right, and you got lucky. Equally likely however, is that the code is wrong, or subtlety wrong, and you’ve just introduced a bug that is going to come back and bite you.</p>
+</section>
+<section id="learn-the-hard-way-sometimes-it-is-good-for-you-personally-i-learn-best" class="level3">
+<h3 class="anchored" data-anchor-id="learn-the-hard-way-sometimes-it-is-good-for-you-personally-i-learn-best">Learn the hard way sometimes: it is good for you Personally, I learn best</h3>
+<p>by doing. In my experience, it also seems that this is true for the vast majority of people. Even if you are someone who can ingest a lot of information just by reading or listening, it still seems to be the case that a deeper understanding is gained by actually writing code that does what you’ve been reading about. This does mean that you will occasionally find yourself re-inventing the wheel. If you are re-inventing because you don’t know that wheels exist, then that is a problem. If you are re-inventing it because you need to know how a wheel works to build a better one, then that’s A-Okay. After all this isn’t a new philosophy. School is really just one very long exercise in re-inventing the wheel and it happens all the way through coursework in PhD programs.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">Copyright 2023, Zach Duey</div>   
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/zduey">
+      <i class="bi bi-github" role="img">
+</i> 
+    </a>
+  </li>  
+    <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/z_duey">
+      <i class="bi bi-twitter" role="img">
+</i> 
+    </a>
+  </li>  
+    <li class="nav-item compact">
+    <a class="nav-link" href="https://linkedin.com/in/zachduey">
+      <i class="bi bi-linkedin" role="img">
+</i> 
+    </a>
+  </li>  
+    <li class="nav-item compact">
+    <a class="nav-link" href="../index.xml">
+      <i class="bi bi-rss" role="img">
+</i> 
+    </a>
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
+
+
+
+</body></html>

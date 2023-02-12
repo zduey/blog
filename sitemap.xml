@@ -2,14 +2,54 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://www.zduey.github.io/index.html</loc>
-    <lastmod>2023-02-12T17:12:56.649Z</lastmod>
+    <lastmod>2023-02-12T21:22:46.584Z</lastmod>
   </url>
   <url>
     <loc>https://www.zduey.github.io/blog.html</loc>
-    <lastmod>2023-02-12T17:12:57.305Z</lastmod>
+    <lastmod>2023-02-12T21:22:47.472Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.zduey.github.io/posts/10000-lines-of-code.html</loc>
+    <lastmod>2023-02-12T21:22:47.832Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.zduey.github.io/posts/2016-retrospective-2017-goals.html</loc>
+    <lastmod>2023-02-12T21:22:48.164Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.zduey.github.io/posts/courage-to-ask.html</loc>
+    <lastmod>2023-02-12T21:22:48.952Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.zduey.github.io/posts/2017-retrospective-2018-goals.html</loc>
+    <lastmod>2023-02-12T21:22:49.376Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.zduey.github.io/posts/ssh-server-on-home-computer.html</loc>
+    <lastmod>2023-02-12T21:22:49.872Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.zduey.github.io/posts/econometrics-for-data-scientists.html</loc>
+    <lastmod>2023-02-12T21:22:50.176Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.zduey.github.io/posts/streaming-stock-data-with-bokeh.html</loc>
+    <lastmod>2023-02-12T21:22:50.560Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.zduey.github.io/posts/funnel-method.html</loc>
+    <lastmod>2023-02-12T21:22:50.916Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.zduey.github.io/posts/intro-bayesian-statistics-presentation.html</loc>
+    <lastmod>2023-02-12T21:22:51.208Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.zduey.github.io/posts/app-deployment-with-heroku.html</loc>
+    <lastmod>2023-02-12T21:22:51.780Z</lastmod>
   </url>
   <url>
     <loc>https://www.zduey.github.io/about.html</loc>
-    <lastmod>2023-02-12T17:12:57.629Z</lastmod>
+    <lastmod>2023-02-12T21:22:52.080Z</lastmod>
   </url>
 </urlset>
