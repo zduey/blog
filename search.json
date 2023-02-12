@@ -2,6 +2,13 @@
   {
     "objectID": "index.html",
     "href": "index.html",
+    "title": "Welcome!",
+    "section": "",
+    "text": "This is a holding ground for my personal blog, projects, and other resources. If history is a good predictor of the future, this will remain lightly populated. I tend to prefer reading, face-to-face conversations, and generally anything that gets me away from a screen."
+  },
+  {
+    "objectID": "blog.html",
+    "href": "blog.html",
     "title": "Posts",
     "section": "",
     "text": "No matching items"
@@ -11,6 +18,6 @@
     "href": "about.html",
     "title": "About",
     "section": "",
-    "text": "About this blog"
+    "text": "I am a father, husband, and data scientist, currently residing in Philadelphia, PA. I am currently the Lead Data Scientist at Activate Care (October 2022).\nProfessionally, I have a dual passion for software engineering and applied statistics with a particular love for all things related to causal inference. At the end of the day, I am most excited by professional and educational opportunities that give me the opportunity to grow in these areas. I completed a master’s degree in computer science at the University of Pennsylvania (May 2022) and received my undergraduate education at American University where I majored in Mathematics & Economics and Philosophy (May 2014).\nMost of my time outside of work is spent with family, friends, and being involved in our local church community (Citylight Church Center City). Since high school, I have cultivated an interest in Christian apologetics, motivated by 1 Peter 3:15-16:\n\n“but in your hearts honor Christ the Lord as holy, always being prepared to make a defense to anyone who asks you for a reason for the hope that is in you; yet do it with gentleness and respect”\n\nI love to cook, make pour-over coffee, and play sports. I was a competitive gymnast for 10 years, dove for a year in high school, and then played ultimate frisbee in college and for a bit afterwards. At this point, I restrict myself to tennis, jogging, and calisthenics to avoid what seemed to be a constant stream of injuries."
   }
 ]
