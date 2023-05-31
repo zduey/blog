@@ -1,0 +1,234 @@
+---
+title: Paths, Files, and File Systems
+author: Zach Duey
+date: 2/20/2023
+categories:
+    - software development
+    - python
+draft: true
+---
+# Introduction
+
+Everyone who writes codes -- software engineers, data engineers, data analysts, data scientists, etc. -- works with files. These files may be stored locally or via remote data storage systems such as Dropbox, S3, and SFTP servers. It is common practice to use locally-stored files for development and debugging purposes and leverage remote data storage systems when code is running in production. Ideally, this transition would be a seamless process requiring minimal to no code changes. However, achieving this goal is complicated by the fact that while most data storage system provide a programmatic way to manage data, their interfaces are dramatically different. In order to write portable code, what we want is a consistent interface for working with files contained in various data storage systems. This interfaces should provide the essential features required for managing files in a way that abstracts over the details specific to each system. Morever, this interface should adhere to the principle of least surprise: it should behave in the way that most users would expect. In this post, we will design a file-management interface satisfying these core requirements. First, we will develop a data storage taxonomy, higlighting the essential differences between different systems that our interface must abstract away. Second, we will enumerate the essential features of the interface. Third, we will take a tour of how a few programming languages have designed their file management interfaces. Finally, we will use everything we have learned thus far to provide a sketch of our ideal interface.
+
+# Persistent Data Storage Taxonomy
+
+In order to develop a taxonomy of persistent data storage systems, let's start by defining a few key terms. A *data storage system* is the system responsible for managing how digital data are _physically_ stored. Hard drives and solid state drives are both examples of physical storage devices. Access to this data is managed by the operating system (OS), which provides the logical infrastructure for manging (reading, writing, deleting, etc.) files via a subsystem cleverly named the *file system*. A file is a collection of logically-related data. Each file is uniquely identified by it's name (including extension) and location. A file's *path* combines these two elements and represents the the logical location of the file within the system. Finally, I will abuse terminology a bit and use the term *storage system* to refer to a combination of these elements.
+
+One of distinguishing features of storage systems is _where_ the data are stored. Local data storage systems are the ones we are most familiar with as they are the system we rely on any time we use our personal or work computers. These systems involve a physically attached hard drive or solid state drive. However, there are a plethora of systems that store data in a separate physical location from the machine used to access that data, which we will refer to as remote data storage systems. Dropbox, OneDrive, Box, and Google Drive are some of the most common examples. Network attached storage (NAS) is another example of a system that provides access to files stored remotely. Servers that allow access to files by remote clients using the file transfer protocol (FTP) are yet another example. Finally, every major cloud service provider (Amazon, Google, and Microsoft) has a blob (binary large object) storage offering that can be considered a type of remote data storage.
+
+The second differentiator between storage systems revolves around _how_ data are stored. There are three aspects to how data are stored that we will consider: type of data storage, organizational structure of the file system, and the storage format used to arrange data elements. There are three main types of data storage: file , object, and block storage. Each is optimized for different purposes, manifested in how the system physically arranges logically-related data on the underlying storage device. Block storage is most commonly used to persist data associated with relational database systems. Object storage is used in cloud-based blob storage like AWS S3, Azure Blob Storage, and GCP object storage. File storage is the most common type of storage as it is used for individual computers and the kinds of remote storage systems used by average consumers (Dropbox, Box, OneDrive, Google Drive, etc.). Storage systems also differ in the organizational structure used by the associated file system. Traditional file systems are hierarchical: files exist within directories and these directories can be nested arbitrarily deeply. In contrast, systems that use a flat organizational structure store all files at a single logical level. Most file storage systems use a hierarchical organizational structure, while object storage systems use a flat organizational structure. Finaly, storage systems also differ in the format used to persist data. If you have ever transfered data from a computer running MacOS to Windows (or vice versa), you will have encountered this phenomenon as they use properietary and incompatible formats. MacOS uses the apple file system (APFS) format, while Micrososft Windows operating systems use the NT file system (NTFS). The storage format is tighly coupled to the operating OS since the OS needs to understand the format in order to provide management of and access to files stored on the physicaly-attached storage device. 
+
+- types of files
+    - standard
+    - temporary
+    - special (sockets)
+
+1. Local file storage: hard disk drives, solid state drives, flash drives, etc.
+2. Cloud-based blob storage: AWS S3, Azure Blog Storage, GCP object storage
+3. Remote file systems: Dropbox, Google Drive, Box, OneDrive, FTP servers
+4. Hierarchical file storage: zip, tar, HDF5, etc.
+
+# Essential Features
+
+
+# File Management in Different Languages
+
+# Interface Sketch
+
+
+## Data Storage Systems, File Systems, Files, and Paths
+
+The top requirement for our interface is that it should be unsurprising, meaning that it should match what most people expect of a library that abstracts over where and how a file is stored. But how do we know what most people will expect of an interface that has not yet been designed? Let's take an uncoventional approach and ask ChatGPT to define its core components. We can expect this to roughly capture what people writing about these terms sees as the distinction between them, which will go a long way towards designing an interfaces that matches those expectations.
+
+Here is the prompt:
+
+> What is the difference between a data storage system, file system, file, and a path?
+
+Here is the response:
+
+>A data storage system, file system, file, and path are related concepts but have different meanings:
+>
+>1. Data storage system: A data storage system is a collection of physical or virtual devices that store digital data, such as hard disk drives, solid-state drives, or cloud storage services. It provides the infrastructure for storing and managing data.
+>
+>2. File system: A file system is a method for organizing and storing files on a data storage system. It provides a hierarchical structure of directories and files, and includes mechanisms for accessing and manipulating files, such as creating, reading, writing, and deleting files.
+>
+>3. File: A file is a collection of related information that is stored as a single unit and can be accessed by name. Files can contain any type of data, such as text, images, audio, or video.
+>
+>4. Path: A path is a string of characters that identifies the location of a file or directory in a file system. It specifies the sequence of directories and subdirectories that must be traversed to reach the file or directory.
+>
+>In summary, a data storage system provides the physical infrastructure for storing digital data, a file system provides the logical structure and mechanisms for organizing and accessing files on a data storage system, a file is a unit of data stored in a file system, and a path is a string of characters that identifies the location of a file or directory within a file system.
+
+Not bad! That response conforms pretty closely to how I had defined the terms^[1].
+
+- path: The location of a file within a file system.
+- file: A collection of logically related pieces of data managed by a file system.
+- file system: The system responsible for managing files and their content.
+- data storage system: The system responsible for managing how data are physically stored.
+
+The only notable difference between these definitions is that ChatGPT is more specific about the organizational structure of file systems (hierarchical with directories and subdirectories). While hierarchical structures are typical, it should not be a definitional requirement. In fact, I was intentionally more abstract becasue I was thinking of blob storage systems, which are not (natively) hierarchical. These definitions imply certain properities and responsibilties (or lackthereof).
+
+Paths are references to the location of a file and therefore do not have any responsibilities. They can be manipulated, but this has no bearing on the underlying files whose location they reference. For example, a path could reference a file that does not exist, but it's not the path's responsibility to know that information.
+
+Files are containers of related data and therefore do not have any responsibilities. While there are many things that can be done to a file (read, write, rename, move, etc.) and properties of a file (name, size, location, etc.), files themselves do not perform any actions.
+
+A file system is responsible for all aspects of managing files: reading, writing, copying, deleting, and more. While a user controls _where_ a file's logical location within the file system, _what_ happens to the file (read, write move), and _when_ it happens, it is the file system that is responsible for managing _how_ it happens.
+
+The data storage system is responsibile for the lower level details about where and how the data associated with files are physically stored.
+
+## Interfaces for Local File Management: A Brief Tour
+
+Programming languages provide widely varying interfaces for interacting with local files. For each of the programming languages we consider, we will be looking at the core abstractions (nouns) provided by the interface and the actions (verbs) associated with each abstraction. At the end of the tour, we will have surfaced both a menu of implementation options and some of the core decisions that go into designing a file management interface.
+
+### Rust
+
+The rust standard library provides the [`std::fs`](https://doc.rust-lang.org/std/fs/index.html#) module for performing local file system manipulations and the [`std::path`](https://doc.rust-lang.org/std/path/index.html) module for working with paths.
+
+A [`std::path::Path`](https://doc.rust-lang.org/beta/std/path/struct.Path.html) is an immutable reference to a file in the underlying file system. It can be constructed from a string, abstracts over differences between Unix and Windows path representations, and provides helpful methods for both inspecting information about the path and its components. It does _not_ provide any methods for manipulating the file referenced by the path. However, it does provide a number of methods that involve inspecting the referenced file:
+
+- `exists`
+- `is_dir`
+- `is_file`
+- `is_symlink`
+- `metadata`
+- `read_dir`
+- `read_link`
+- `symlink_metadata`
+- `try_exists`
+
+While these methods are convenient, they go against the implementation implied by our definition, in which a path had no responsibilities for or knowledge of the details associated with the referenced file. The definition implies that these actions fall under the purview of the file system, not a path. This brings us to our first design consideration: the tradeoff between convenience and surprise. Strict conformity to the interfaces implied by the definitions results in a less surpising interface. However, this comes at the expense of convenience as it may require more entities (e.g. path and file system) to perform an operation like checking if a file referenced by a path exists. The requirement that the interface be unsurprising does not preclude making some decisions in favor of convenience, but it does push us to favor a more strict conformity that maintains at least some distinction in responsibilities. Keeping this trade off in mind, let's get back to our exploration of how Rust solves the file management problem.
+
+The [`std::fs`](https://doc.rust-lang.org/std/fs/index.html) module provides various structs and functions for manipulating files on the local file system. The [`std::fs::File`](https://doc.rust-lang.org/beta/std/fs/struct.File.html) struct includes operations for creating, opening, reading, and writing to the file. There is also a `metadata` method (same as `Path.metadata()`) that returns a container for file metadata. The module-level functions support managing files and their permissions as well inspecting both files and directories. While some of these functions perform operations that do not exist elsewhere, others overlap with methods available on `Path` and `File`. For example, both `File` and `fs` have the ability to set permissions on a file. Moreover, there are five operations that overlap between `Path` and `fs`: `canonicalize`, `try_exists`, `read_link`, `read_dir`, and `symlink_metadata`. The operations distinct to the `std::fs` module include copying, renaming, and removing files. As a convenience, the `fs` module also has the ability to read and write to a file, but can only be done on the entire file's contents whereas similar methods on `File` can read and write at arbitrary points in the file.
+
+This brief exploration of the `fs` module surfaces a few additional design considerations. To what extent should different entities have overlapping operations or responsibilities? Strict adherence to our definitions would suggest that there should be no overlap such that there is one and only one way to perform an operation. However, we must weigh this against the convenience of requiring fewer entities to perform simple operations. This is really just another instance of the convenience vs. surprise tradeoff noted earlier. Second, we need to determine whether there are additional entities beyond our three core ones that would be beneficial in the library. Rust includes a few that are worth considering: `Metadata`, `DirEntry`, `Permissions`, and `FileType` to name a few.
+
+## Nodejs
+
+Nodejs is similar to Rust in that the standard library includes two distinct modules for working with local files: [`fs`](https://nodejs.org/api/fs.html) and [`path`](https://nodejs.org/api/path.html). The `path` module contains a handful of functions that operate on strings representing file paths. These functions, much like Rust, abstract over the differences between Windows and Posix paths. Unlike Rust, paths are represented as strings rather than their own class. There is a [helper function](https://nodejs.org/api/path.html#pathparsepath) to parse the path into its consituent components (directory, root, base, name, and extention). These parased values would be attributes on a path object if it existed. The `path` module includes functions that perform essentially the same operations as the Rust module, but using a functional interface where the first argument to each function is a string representing the file path. This is another design decision worth considering: should the representation for a path be distinct from a string? The other difference between Rust and Nodejs is that the Nodejs `path` module does not include any operations that require inspecting the underlying file referenced by the path. In this way, the Nodejs implementation is closer to the one implied by our definition of a path.
+
+The `fs` module provided by NodeJS includes a smattering of classes and functions for working with files. Much like the `path` module, there are some strong similaries to Rust, but also some informative differences. Although the naming and interfaces differ, both Rust and NodeJS include entities representing files, directory entries, and file metadata. NodeJS includes additional classes representing metadata for the file system ([`fs.StatFS`](https://nodejs.org/api/fs.html#class-fsstatfs)), directories ([`fs.Dir`](https://nodejs.org/api/fs.html#class-fsdir)), file watchers ([`fs.FSWatcher`](https://nodejs.org/api/fs.html#class-fsfswatcher)), and streams for reading from ([`fs.ReadStream`](https://nodejs.org/api/fs.html#class-fsreadstream)) and writing to ([`fs.WriteStream](https://nodejs.org/api/fs.html#class-fswritestream)) files. These additional classes add to our menu of potential helper classes and data structures that we may want to consider including in our interface.
+
+The `fs` module supports providing file names as either a string or `URL` (via the `file:///` syntax). URLs are logically similar to files in that they reprsent the location of a resource so there is reason to consider following NodeJS's example in our interface. URLs encode much more information than a file path (query parameters, protocol, etc.), so there is an argument for requiring the user to convert their URL to a path (or string, depending on our decision) prior to working with non-local files. The biggest overlap is in the case of a static web server. In this case, the web server itself can be though of as a sort of file system or data storage system with URLs playing the role of paths to resources on the server. Traditional file systems and static web servers are hierarchical, so the overlap is quite strong in how the locations of the resources are represented.
+
+The NodeJS [`fs.FileHandle`](https://nodejs.org/api/fs.html#class-filehandle) class mirrors the Rust `File` struct. Both interfaces include methods for operating on the underlying file: changing permissions, ownership, reading, writing, and retrieving metadata. As before, these types of convenience methods go against our definitions. The `fs` module itself contains a set of overlaping functionality, much like the Rust interface. There are some slight difference in the set of overlapping functionality, but the majority is the same. The module includes functionality not found in one of the helper classes. Functionality for working with (creating, reading, deleting) directories, copying files, creating file watchers, etc. This is, again, a similar pattern to Rust where methods associated with files mirrors what is available within the module.
+
+## Go
+
+The Go programming language's approach to paths, files, and filesystems elucidates an important distinction between generic paths and files, and their operating system dependent counterparts. In Go, a path is a reference to a locationt that uses slashes to separate components. Generic paths are not meant for manipulating operating system paths or abstracting over the differences between POSIX and Windows paths. The functionality for working with generic paths is available in the [path](https://pkg.go.dev/path) package, while the [path.filepath](https://pkg.go.dev/path/filepath) contains the functionality for working with operating system defined paths. Generic paths have a superset of the functionality available when working with OS-defined paths, including the ability to match a given path against a specified pattern. OS-defined paths have additional functionality including the ability to perform globbing and walking. Pattern matching, globbing, and walking are all features that we could consider adding to our interface.
+
+Go provides two packages with overlapping entities and functionality for working with files and file systems. This duplication is the result of the distinction between operating-system files and generic files. The functionality for managing operating system files lives in the [`os`](https://pkg.go.dev/os) package, while the functionality for working with generic files and file systems lives in the [`fs`](https://pkg.go.dev/io/fs) package. The `os` package includes functionality related to the operating system, which includes all functionality associated with working with the associated file system. The `fs` package provides a [file system interface](https://pkg.go.dev/io/fs#FS) for working with file systems, whether or not they are provided by the host operating system. Both the `os` and `fs` packages include support for globbing and walking in addition to the typical file system features.
+
+## Python
+
+The python standard library has three different modules for file management and a variety of third-party libraries that provide additional abstractions on top of those four. The [`os`](https://docs.python.org/3/library/os.html) module mirrors Go in that it contains functionality typically managed by the operating system including, but not limited to, the file system. The [`shutil`](https://docs.python.org/3/library/shutil.html) module contains higher level abstractions for working with multiple files: creating and removing directories, moving multiple files, and more. Finally, the [`pathlib`](https://docs.python.org/3/library/pathlib.html) module provides an object-oriented interface for working with file system paths. Like other libraries that we have looked at, it abstracts over the differences between Windows and POSIX paths. It does not work with more general paths and is therefore closer to Go's `path.filepath` package. Pathlib provides both a "pure" interface in which only methods and attributes that do not require system calls are available and a more featureful interface where such calls may be made. In this way, it allows the user to make their own decision about how the trade off between strictness to the definition of a path and convenience.
+
+The trade off between surprise and convencience is beautifully illustrated by looking at two third-party libraries that abstract file system management to work with cloud and local file systems. `[cloudpathlib`]() leans fully into convenience by expanding the pathlib interface to work with cloud storage providers. The core -- and only -- abstraction is a `Path`, which contains all of the supported functionality. It completely blurs the distinction between a file, path, and file system. In contrast, [`PyFileSystem2`]()takes an approach that more closely follows the definitions that we outlined at the beginning of this post. The core abstraction is a `FileSystem`, which contains all functionality for managing files and directories. A [file-like object](https://docs.python.org/3/glossary.html#term-file-like-object) is returned any time a file is opened using an instance of a `FileSystem`. Like NodeJS, paths are represented as strings and a `path` module provides a functional interface for working with generic paths.
+
+# Designing the Library
+
+## Features
+
+The first thing we need to do as we move on to designing our interface is decide what functionality the interface should support. The motivation for creating this library was to facilitate writing portable file management code, so all functionality should directly support that objective. Any functionality specific to a particular data storage system (e.g. S3) should not be included because, by definition, that functionality is not portable to other systems. Even with that guardrail, there is still a trade off that we need to consider. The more expansive the interface, the more portable our code will be and therefore our objective will be more fully accomplished. However, this comes at the expense of maintainability and extensibility. Larger interfaces take longer to implement, learn, and maintain. Moreover, larger interfaces impose a bigger burden on users wishing to write their own impelementations for a new data storage system. As with all design decisions, there is no obvious right choice, but one way we can arrive at a decision is to enumerate the core set of *required* features and a separate set of *desired* features. Our survey of Rust, NodeJS, Go, and Python provide a menu of options to consider.
+
+
+## Abstractions
+
+The next thing we need to do is decide on the core set of abstractions that we want to provide our users as well as which functionality is associated with which abstraction. This is where our decision about where to fall on the continuum between surprise and convenience will really play out.
+
+- `FileSystem`
+- `Path`
+- `File`
+
+
+# Conclusion
+
+- If you are working in python, just use `PyFileSystem2`. There is room for a library that expands pathlib's PurePath to file systems not managed by the operating system, but it isn't essential.
+
+^[1]You'll just have to trust me that I wrote mine down before asking ChatGPT.
+^[2]: To illustrate what I mean, consider a brief digression about *file descriptors*. On unix systems, _everything_ related to input/output operations happens via the file system. The file system is one sub-system within the operating system, which has much broader responsibilities. Of particular importance is that the operating system maintains a collection of integers, called *file discriptors*, corresponding to files that are currently open. They are used by the operating system to manage access to files across concurrently running threads and processes. A file descriptor is managed by the operating system, and therefore, the file system has no knowledge or ability to use these descriptors. While file descriptors are important for understanding the full picture of how unix-based systems manage files in the presense of thread and process-based concurency, they are not essential for our purposes. We can assume that it is the responsibility of the storage systems we are attempting to abstract over with our hypothetical library to manage this concurrency and can therefore safely ignore the notion of a file descriptor.
+
+
+# Appendix/Graveyard
+
+## Original Introduction
+
+What is the difference between a path and a file and how are they related to a
+file system? This may seem like a pretty mundane question, but it caused me to
+do quite a bit of self-reflecting recently. The crux of the issue is that none
+of the python libraries  that I typically use (e.g.
+[os.path](https://docs.python.org/3/library/os.path.html),
+[pathlib](https://docs.python.org/3/library/pathlib.html)) fit my mental model
+of what a path and file represent. In my head, a path is a reference to a
+location in a file system. A file represents a piece of data that exists in a
+file system. A file system is a collection of files and a means of representing
+them on disk. While these definitions are not formal or rigorous, they do allow
+you to reason about what behaviors you would expect to be possible with a path
+vs. file vs. filesystem. For example, it does not make sense for a path to have
+an `is_file` or `is_dir` method since a reference to a location in a file
+system should not have knowledge about what may or may not exist at that
+location. However, there are a number of useful things you might want to do
+with paths such as normalizing them, combining with another path, inspecting
+components of the path (extension, parent directory, etc.), and more. 
+
+Just because the libraries I use don't fit this mental model doesn't make them
+bad. However, what it does mean is that it may be beneficial to switch to a
+library that better fits my mental model. If such a library does not exist and
+my mental model of paths vs. files vs. file systems is more universal than
+idiosyncratic, then it may be worthwhile to the broader community to build such
+a library. The remainder of this post describes how I ended up wrestling with
+this question for far too long and the lessons I learned along the way.
+
+## Backstory
+
+A lot of my day-to-day work invovles interacting with files programmatically.
+These files may live on my local machine, a remote server, a NAS
+(network-attached storage), in the cloud (e.g. AWS S3), or elsewhere. A few
+years ago while working on a project that was heavy on data engineering, I had
+the idea that it would be nice to interact with local files in exactly the same
+way as files stored in any other file system. In conjunction with a co-worker,
+I threw together an initial version of a package
+([pathman](https://pypi.org/project/pathman/)) that abstracted away the
+difference between S3 and local file paths. For local paths, the package
+delegated to pathlib. For files on S3, the package acted as a lightweight
+wrapper around S3FS. The long-term vision was to add support for additional
+file systems (e.g. dropbox, the dropbox-like product for medical data that we
+were building at the time, etc.) and create a simple way for users to write
+their own plug-ins. While we intentionally tried to mirror the pathlib
+interface, we started small and only added methods to the generic interface as
+they became necessary. Over time, we ended up mirroring a significant portion
+of the pathlib interface. This utility package also became fairly heavily
+integrated into our ecosystem within the internal data science team. Along the
+way, I was also allowed to open-source it. I eventually left the company, but
+continued to use the package from time to time. Unfortunately, the company
+folded about a year later and deleted it's GitHub account including all public
+repositories associated with the organization, which left the package in a
+weird state of being publicly-available (pip-installable via PyPI), but
+un-maintainble. After figuring out the proper (e.g. license-abiding) way, I
+eventually released a minimal clone of the package cleverly named
+[pathman2](https://github.com/zduey/pathman2) (e.g. no docs or tests since
+those are not bundled with the public package) so that I could start personally
+maintaining it. It then occured to me that before I sunk any more time into
+creating docs, adding tests, or refactoring the code, I should assess if there
+was something similar already in existence and actively maintained.
+
+## Prior Art
+
+Once I started looking, I found two packages that seemed to fit the bill:
+[pathy](https://github.com/justindujardin/pathy) and
+[PyFileSystem2](https://github.com/PyFilesystem/pyfilesystem2). I found the
+first because I was considering calling the pathman reboot `pathy` and wanted
+to see if the name had been taken. As it turns out, it was, and by a library
+that basically had exactly the same goal as the original pathman library. The
+first sentence of the README states:
+
+>Pathy is a python package (with type annotations) for working with Cloud Bucket storage providers using a pathlib interface.
+
+I don't remember exactly how I found PyFileSystem2, but I was immediately
+intrigued after reading the "Why use PyFilesystem" section of the
+documentation:
+
+>The abstraction offered by FS objects means that you can write code that is
+>agnostic to where your files are physically located. For instance, if you
+>wrote a function that searches a directory for duplicates files, it will work
+>unaltered with a directory on your hard-drive, or in a zip file, on an FTP
+>server, on Amazon S3, etc.
