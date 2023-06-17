@@ -1,80 +1,85 @@
 ---
-title: Paths, Files, and File Systems
+title: Paths, Files, and Filesystems, Oh My!
 author: Zach Duey
 date: 2/20/2023
 categories:
     - software development
-    - python
 draft: true
 ---
-# Introduction
 
-Everyone who writes codes -- software engineers, data engineers, data analysts, data scientists, etc. -- works with files. These files may be stored locally or via remote data storage systems such as Dropbox, S3, and SFTP servers. It is common practice to use locally-stored files for development and debugging purposes and leverage remote data storage systems when code is running in production. Ideally, this transition would be a seamless process requiring minimal to no code changes. However, achieving this goal is complicated by the fact that while most data storage system provide a programmatic way to manage data, their interfaces are dramatically different. In order to write portable code, what we want is a consistent interface for working with files contained in various data storage systems. This interfaces should provide the essential features required for managing files in a way that abstracts over the details specific to each system. Morever, this interface should adhere to the principle of least surprise: it should behave in the way that most users would expect. In this post, we will design a file-management interface satisfying these core requirements. First, we will develop a data storage taxonomy, higlighting the essential differences between different systems that our interface must abstract away. Second, we will enumerate the essential features of the interface. Third, we will take a tour of how a few programming languages have designed their file management interfaces. Finally, we will use everything we have learned thus far to provide a sketch of our ideal interface.
+Everyone who writes codes -- software engineers, data engineers, data scientists, etc. -- works with files. These files may be stored locally or via remote storage systems such as Dropbox, S3, and SFTP servers. It is common practice to use locally-stored files for development and debugging purposes and leverage remote data storage systems when code is running in production. Ideally, this transition would be a seamless process requiring minimal to no code changes. However, achieving this goal is complicated by the fact that while most data storage system provide a programmatic way to manage data, their functionality and interfaces differ dramatically. In order to write portable code, there needs to be a generic interface for working with files compatible with a wide variety of data storage systems. This interfaces should provide the essential features required for managing files in a way that abstracts over the details specific to each system. Moreover, this interface should adhere to the principle of least surprise: it should behave in the way that most users would expect. In this post, we will design a file management interface satisfying these core requirements. First, we will highlight the core differences between storage systems that our interface must abstract away. Second, we will enumerate the essential features of the interface. Third, we will take a tour of how a few programming languages have designed their file management interfaces. Finally, we will use everything we have learned thus far to provide a sketch of our ideal interface.
 
-# Persistent Data Storage Taxonomy
+# Data Storage Essentials
 
-In order to develop a taxonomy of persistent data storage systems, let's start by defining a few key terms. A *data storage system* is the system responsible for managing how digital data are _physically_ stored. Hard drives and solid state drives are both examples of physical storage devices. Access to this data is managed by the operating system (OS), which provides the logical infrastructure for manging (reading, writing, deleting, etc.) files via a subsystem cleverly named the *file system*. A file is a collection of logically-related data. Each file is uniquely identified by it's name (including extension) and location. A file's *path* combines these two elements and represents the the logical location of the file within the system. Finally, I will abuse terminology a bit and use the term *storage system* to refer to a combination of these elements.
+Data storage is a broad and rich topic in computer science, but one that is far beyond the scope of this post. Instead, we will focus on a few key terms and distinctions that are relevant for designing a file system management interface.
 
-One of distinguishing features of storage systems is _where_ the data are stored. Local data storage systems are the ones we are most familiar with as they are the system we rely on any time we use our personal or work computers. These systems involve a physically attached hard drive or solid state drive. However, there are a plethora of systems that store data in a separate physical location from the machine used to access that data, which we will refer to as remote data storage systems. Dropbox, OneDrive, Box, and Google Drive are some of the most common examples. Network attached storage (NAS) is another example of a system that provides access to files stored remotely. Servers that allow access to files by remote clients using the file transfer protocol (FTP) are yet another example. Finally, every major cloud service provider (Amazon, Google, and Microsoft) has a blob (binary large object) storage offering that can be considered a type of remote data storage.
+A *data storage system* is the system responsible for managing how digital data are _physically_ stored. Hard drives and solid state drives are both examples of *physical storage devices*. Access to and management of data on these devices is handled by a *file system*, typically via an abstraction called a *file*. A file is a collection of logically-related data identified by its *path*, which is the _logical_ location of the file within the file system. Finally, I will abuse terminology a bit and use the term *storage system* to refer to the combination of these elements.
 
-The second differentiator between storage systems revolves around _how_ data are stored. There are three aspects to how data are stored that we will consider: type of data storage, organizational structure of the file system, and the storage format used to arrange data elements. There are three main types of data storage: file , object, and block storage. Each is optimized for different purposes, manifested in how the system physically arranges logically-related data on the underlying storage device. Block storage is most commonly used to persist data associated with relational database systems. Object storage is used in cloud-based blob storage like AWS S3, Azure Blob Storage, and GCP object storage. File storage is the most common type of storage as it is used for individual computers and the kinds of remote storage systems used by average consumers (Dropbox, Box, OneDrive, Google Drive, etc.). Storage systems also differ in the organizational structure used by the associated file system. Traditional file systems are hierarchical: files exist within directories and these directories can be nested arbitrarily deeply. In contrast, systems that use a flat organizational structure store all files at a single logical level. Most file storage systems use a hierarchical organizational structure, while object storage systems use a flat organizational structure. Finaly, storage systems also differ in the format used to persist data. If you have ever transfered data from a computer running MacOS to Windows (or vice versa), you will have encountered this phenomenon as they use properietary and incompatible formats. MacOS uses the apple file system (APFS) format, while Micrososft Windows operating systems use the NT file system (NTFS). The storage format is tighly coupled to the operating OS since the OS needs to understand the format in order to provide management of and access to files stored on the physicaly-attached storage device. 
+The first area where storage systems differ is where the system stores data. While there are different levels to the notion of where data are stored, we are interested in the high-level distinction between data that are stored locally and data that are stored remotely. *Local data storage systems* are the ones we are most familiar with as they are the system we rely on any time we use individual computers. These systems involve a physical storage device co-located on the same machine used to access that data. In contrast, there are a plethora of systems that store data in a separate physical location from the machine used to access that data, which we will refer to as *remote data storage systems*. Dropbox, OneDrive, Box, and Google Drive are some of the most common examples. Network attached storage (NAS) and FTP servers are two others. Finally, every major cloud service provider (Amazon, Google, and Microsoft) has a blob storage offering that can be considered a type of remote data storage. While it is possible for a data storage system to blur the line between local and remote via caching or other technical implementation details, it is usually safe to talk about a storage system as being _primarily_ remote or local. A core goal of our file system interface is that is should abstract away differences between remote and local data storage systems such that users can seamlessly switch between them with minimal code changes.
 
-- types of files
-    - standard
-    - temporary
-    - special (sockets)
+The second differentiator between storage systems revolves around _how_ data are stored. There are two aspects to how data are stored that we will consider: type of data storage and the organizational structure of the file system.
 
-1. Local file storage: hard disk drives, solid state drives, flash drives, etc.
-2. Cloud-based blob storage: AWS S3, Azure Blog Storage, GCP object storage
-3. Remote file systems: Dropbox, Google Drive, Box, OneDrive, FTP servers
-4. Hierarchical file storage: zip, tar, HDF5, etc.
+There are three main types of data storage: file , object, and block storage. Each is optimized for different purposes, manifested in how the system physically arranges logically-related data on the underlying storage device. Block storage is most commonly used to persist data associated with relational database systems. Object storage is used in cloud-based blob storage like AWS S3, Azure Blob Storage, and GCP object storage. File storage is the most common type of storage as it is used for individual computers and the kinds of remote storage systems used by average consumers (Dropbox, Box, OneDrive, Google Drive, etc.) and involves storage, management, and access of files. We are primarily concerned with file and object storage as both types of storage systems allow access to logically-related data, regardless of how it is physically persisted. One challenge when designing our interface will be to design it in such a way that it abstracts over the differences between object and file storage systems. One of these differences involves the organizational structure used by the system: the second aspect of how data are stored that we will consider.
 
-# Essential Features
+There are two types of organziational strucutres relevant for our discussion that our interface will need to handle: hierarchical and flat. Hierarchical organizational structures introduce directories, which may contain both files and other directories. In contrast, systems that use a flat organizational structure store all files at a single logical level and do not have a notion of a directory. Most file-based storage systems use a hierarchical organizational structure, while object storage systems use a flat organizational structure.
 
+The final difference between storage systems relevant for designing our interface has to do with how files are managed. To make things clear, we need to distinguish between the generic notion of a file and the more specific version. Our definition of a file as a collection of logically-related data captures the generic sense of a file. However, the term file is often used to refer to files managed by an operating system. We will refer to these as *operating system files* (OS files) to differentiate them from files in the generic sense of the word. The portable operating system interface (POSIX) defines a set of standards for file systems managing OS files. However, both Windows and at least some Unix-based systems are not fully POSIX compliant. As a result, the interface for working with OS files as well as the guarantees around file management differ depending on the host operating system. More than that, the POSIX file system interface for OS files includes attributes and operations that are not relevant for files in the generic sense. For example, POSIX includes the ability to seek to a particular position within a file, which may not be possible in other storage systems. Our file management interface will therefore need to abstract over the differences between not only local file systems managed by different host operating systems, but also interface differences between OS files and files managed by other systems.
+
+# Essential Requirements and Features
+
+While the particular requirements of our interface are important, there are a few broader principles to how it should be designed that we have mentioned already and that bears repeating. The overarching motivation for designing our file system library is to faciliate writing portable code. The guiding design principle is that the interface should be unsurprising. Said differently, the library should be easy to use, feel familiar, and just make sense. We will get to _how_ to achieve these goals in the implementation section, but for now we will zoom in one level and look at the broad set of requirements the interface must meet.
+
+Our brief exploration of storage systems surfaced three areas where storage systems differ that our library must abstract away: where the data are stored, how the data are stored, and how stored data are managed. Abstracting away these three sets of differences is the core requirement of our library. However, to make things more concrete, there are four categories of storage systems that we would like our library to support: local file storage managed by different operating systems, cloud-based blob storage, remote file systems, and file _formats_ that can be thought of as self-contained hierarchical file systems. A few common examples inldue zip files tarballs, and files stored using the hierarchical data format (HDF5). With these broader requirements in mind, we can now zoom in one more layer to the specific features that we would like the library to support.
+
+As we think about features, there are three ways to classify them: essential vs. optional, common vs. specific, and by the component, to which, they are associated. We will go through the essential and non-essential features for each of the components that our interface will manage: files, directories, and paths.
+
+## Files
+
+There are the 4 essential file management operations:
+
+1. Create
+2. Read
+3. Write
+4. Delete
+
+This list may surprise you as it excludes some features that you may have expected:
+
+1. Update
+2. Move
+3. Rename
+4. Copy
+
+These operations were left off because, although it may be less efficient, they can be accomplished using the four core operations. In particular, each of the noted non-essential operations can be achieved by reading the file's contents into a temporary location not managed by the interface, removing the old file, creating a new file, optionally manipulating the in-memory data, and then writing the data to the new file. While these operations are not technically essential, it would probably surprise most users to have them as core features. Given our guiding design principle, it would make sense to include these common, but non-essential, operations in our interface.
+
+There are two other common file manipulation features that we have left out thus far:
+
+1. Partial read
+2. Partial write
+
+As with the other non-essential features, you can achieve a similar behavior using the core operations. To partially read, you would need to read all data into a temporary location and then read the contents that you want from that location. Partial writes are similar, except that you would update the content outside of the file management interface before writing it back to a file using the interface. Not having the ability to perform partial reads and writes is likely also going to be surprising, which is a point in favor of including it in the core interface. However, not all storage systems natively support random access, which is an essential underlying operation for partially reading and writing to a file and therefore a mark against including these operations in the core interface. We will return to this decision later. 
+
+## Directories
+
+Directory management is essential for hierarchical storage systems, but since not all storage systems are hierarchial, it should not be part of the core interface. We will think about this more in the implementation section, but for now it suffices to think of our file management interface as likely containing multiple layers of interfaces. The features that are both essential and common belong to the core interface. Directory management features belong to the interface shared by all _hierarchical_ storage systems. For such systems, there are three essential operations:
+
+1. Create
+2. Read (list contents)
+3. Delete (can be recursive)
+
+Much like for file manipulation, there are a few not-technically-essential operations that should probably be part of the standard interface:
+
+1. Move
+2. Copy
+
+To keep the interface for hierarchical storage systems unsurprising, it is probably best for us to include these operations in the interface.
+
+## Path
+
+A path is the location of a file in filesystem. Interestingly, you can make the case that there are no essential features for paths since they can be represented with a standard type (e.g. string) in most programming languages. There are any number of nice-to-have features that one might imagine being associated with a path: extracting relevant parts (extension, file name, etc), combining, standdarding, and more. However, we will defer any more details until after exploring how different programming languages handle paths, as well as other abstractions related to file management, in the following section.
 
 # File Management in Different Languages
 
 # Interface Sketch
-
-
-## Data Storage Systems, File Systems, Files, and Paths
-
-The top requirement for our interface is that it should be unsurprising, meaning that it should match what most people expect of a library that abstracts over where and how a file is stored. But how do we know what most people will expect of an interface that has not yet been designed? Let's take an uncoventional approach and ask ChatGPT to define its core components. We can expect this to roughly capture what people writing about these terms sees as the distinction between them, which will go a long way towards designing an interfaces that matches those expectations.
-
-Here is the prompt:
-
-> What is the difference between a data storage system, file system, file, and a path?
-
-Here is the response:
-
->A data storage system, file system, file, and path are related concepts but have different meanings:
->
->1. Data storage system: A data storage system is a collection of physical or virtual devices that store digital data, such as hard disk drives, solid-state drives, or cloud storage services. It provides the infrastructure for storing and managing data.
->
->2. File system: A file system is a method for organizing and storing files on a data storage system. It provides a hierarchical structure of directories and files, and includes mechanisms for accessing and manipulating files, such as creating, reading, writing, and deleting files.
->
->3. File: A file is a collection of related information that is stored as a single unit and can be accessed by name. Files can contain any type of data, such as text, images, audio, or video.
->
->4. Path: A path is a string of characters that identifies the location of a file or directory in a file system. It specifies the sequence of directories and subdirectories that must be traversed to reach the file or directory.
->
->In summary, a data storage system provides the physical infrastructure for storing digital data, a file system provides the logical structure and mechanisms for organizing and accessing files on a data storage system, a file is a unit of data stored in a file system, and a path is a string of characters that identifies the location of a file or directory within a file system.
-
-Not bad! That response conforms pretty closely to how I had defined the terms^[1].
-
-- path: The location of a file within a file system.
-- file: A collection of logically related pieces of data managed by a file system.
-- file system: The system responsible for managing files and their content.
-- data storage system: The system responsible for managing how data are physically stored.
-
-The only notable difference between these definitions is that ChatGPT is more specific about the organizational structure of file systems (hierarchical with directories and subdirectories). While hierarchical structures are typical, it should not be a definitional requirement. In fact, I was intentionally more abstract becasue I was thinking of blob storage systems, which are not (natively) hierarchical. These definitions imply certain properities and responsibilties (or lackthereof).
-
-Paths are references to the location of a file and therefore do not have any responsibilities. They can be manipulated, but this has no bearing on the underlying files whose location they reference. For example, a path could reference a file that does not exist, but it's not the path's responsibility to know that information.
-
-Files are containers of related data and therefore do not have any responsibilities. While there are many things that can be done to a file (read, write, rename, move, etc.) and properties of a file (name, size, location, etc.), files themselves do not perform any actions.
-
-A file system is responsible for all aspects of managing files: reading, writing, copying, deleting, and more. While a user controls _where_ a file's logical location within the file system, _what_ happens to the file (read, write move), and _when_ it happens, it is the file system that is responsible for managing _how_ it happens.
-
-The data storage system is responsibile for the lower level details about where and how the data associated with files are physically stored.
 
 ## Interfaces for Local File Management: A Brief Tour
 
@@ -145,7 +150,6 @@ The next thing we need to do is decide on the core set of abstractions that we w
 - If you are working in python, just use `PyFileSystem2`. There is room for a library that expands pathlib's PurePath to file systems not managed by the operating system, but it isn't essential.
 
 ^[1]You'll just have to trust me that I wrote mine down before asking ChatGPT.
-^[2]: To illustrate what I mean, consider a brief digression about *file descriptors*. On unix systems, _everything_ related to input/output operations happens via the file system. The file system is one sub-system within the operating system, which has much broader responsibilities. Of particular importance is that the operating system maintains a collection of integers, called *file discriptors*, corresponding to files that are currently open. They are used by the operating system to manage access to files across concurrently running threads and processes. A file descriptor is managed by the operating system, and therefore, the file system has no knowledge or ability to use these descriptors. While file descriptors are important for understanding the full picture of how unix-based systems manage files in the presense of thread and process-based concurency, they are not essential for our purposes. We can assume that it is the responsibility of the storage systems we are attempting to abstract over with our hypothetical library to manage this concurrency and can therefore safely ignore the notion of a file descriptor.
 
 
 # Appendix/Graveyard
@@ -232,3 +236,42 @@ documentation:
 >wrote a function that searches a directory for duplicates files, it will work
 >unaltered with a directory on your hard-drive, or in a zip file, on an FTP
 >server, on Amazon S3, etc.
+
+## Designing an Unsurprising Interface
+
+The top requirement for our interface is that it should be unsurprising, meaning that it should match what most people expect of a library that abstracts over where and how a file is stored. But how do we know what most people will expect of an interface that has not yet been designed? Let's take an unconventional approach and ask ChatGPT to define its core components. We can expect this to roughly capture what people writing about these terms sees as the distinction between them, which will go a long way towards designing an interfaces that matches those expectations.
+
+Here is the prompt:
+
+> What is the difference between a data storage system, file system, file, and a path?
+
+Here is the response:
+
+>A data storage system, file system, file, and path are related concepts but have different meanings:
+>
+>1. Data storage system: A data storage system is a collection of physical or virtual devices that store digital data, such as hard disk drives, solid-state drives, or cloud storage services. It provides the infrastructure for storing and managing data.
+>
+>2. File system: A file system is a method for organizing and storing files on a data storage system. It provides a hierarchical structure of directories and files, and includes mechanisms for accessing and manipulating files, such as creating, reading, writing, and deleting files.
+>
+>3. File: A file is a collection of related information that is stored as a single unit and can be accessed by name. Files can contain any type of data, such as text, images, audio, or video.
+>
+>4. Path: A path is a string of characters that identifies the location of a file or directory in a file system. It specifies the sequence of directories and subdirectories that must be traversed to reach the file or directory.
+>
+>In summary, a data storage system provides the physical infrastructure for storing digital data, a file system provides the logical structure and mechanisms for organizing and accessing files on a data storage system, a file is a unit of data stored in a file system, and a path is a string of characters that identifies the location of a file or directory within a file system.
+
+Not bad! That response conforms pretty closely to how I had defined the terms^[1].
+
+- path: The location of a file within a file system.
+- file: A collection of logically related pieces of data managed by a file system.
+- file system: The system responsible for managing files and their content.
+- data storage system: The system responsible for managing how data are physically stored.
+
+The only notable difference between these definitions is that ChatGPT is more specific about the organizational structure of file systems (hierarchical with directories and subdirectories). While hierarchical structures are typical, it should not be a definitional requirement. In fact, I was intentionally more abstract becasue I was thinking of blob storage systems, which are not (natively) hierarchical. These definitions imply certain properities and responsibilties (or lackthereof).
+
+Paths are references to the location of a file and therefore do not have any responsibilities. They can be manipulated, but this has no bearing on the underlying files whose location they reference. For example, a path could reference a file that does not exist, but it's not the path's responsibility to know that information.
+
+Files are containers of related data and therefore do not have any responsibilities. While there are many things that can be done to a file (read, write, rename, move, etc.) and properties of a file (name, size, location, etc.), files themselves do not perform any actions.
+
+A file system is responsible for all aspects of managing files: reading, writing, copying, deleting, and more. While a user controls _where_ a file's logical location within the file system, _what_ happens to the file (read, write move), and _when_ it happens, it is the file system that is responsible for managing _how_ it happens.
+
+The data storage system is responsibile for the lower level details about where and how the data associated with files are physically stored.
