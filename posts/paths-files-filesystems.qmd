@@ -36,16 +36,31 @@ Third, data storage systems may be centralized or distributed. A **centralized d
 
 The third differentiator between storage systems has to do with the guarantees offered by the associated filesystem. Many filesystems allow data to be accessed concurrently (via threads, processes, or multiple client machines) and guarantee strong consistency, which means that any read operation will return the latest data. For example, both S3 and POSIX-compatible filesystems[^4] offer strong consistency guarantees. However, some distributed storage system offer a weaker guarantee called eventual consistency. The difference between consistency or other types of guarantees is not important. For our purposes, what is important is that our interface hides these differences from the user.
 
-The final differentiator between storage systems involves the filesystem semantics. To illustrate what I mean, let's consider the difference between files in the generic sense and files managed by a computer's operating system (OS files). On a single computer, the local filesystem is itself managed by the host operating system. However, the filesystem component of many data storage systems are not fundamentally managed by a host operating system. These perating system files often have a particular set of semantics that are not shared by all storage systems. For example, on many *Nix[^5] systems, OS files are managed via file descriptors, which are a unique identifier for a file. Moreover, other operating systems have different semantics for working with files and paths. As another example, Windows uses backslashes to separate path components, while *Nix systems use forward slashes. Our interface should support managing both types of files (generic and OS) without imposing the semantics associated with one onto the other.
+The final differentiator between storage systems involves filesystem semantics. I am abusing the term "semantics" a bit, so let me expalin what I mean by way of an example. On a single computer, the local filesystem is itself managed by the host operating system. However, the filesystem component of many data storage systems are not managed by a host operating system. These operating-system managed files (OS files) involve concepts (semantics) that are not shared by all storage systems. For example, on many *Nix[^5] systems, OS files are managed via a file descriptors, which is a unique identifier for a file. Other data storage systems like AWS S3, Dropbox, and others do not have similar constructs and therefore, it would be weird to impose the semantics of file descriptors on all storage systems supported by our interface. Our interface should support managing both types of files (generic and OS) without imposing the semantics associated with one onto the other.
 
+To make things concrete, @tbl-classification uses the taxonomy that we have just developed to classify the main storage systems that our interface should support. For example, the table says that a local file system is hierarchical, centralized, offers strong consistency, and uses the semantics typically associated with OS files (e.g. file descriptors).
+
+| **Storage System** | **Where** | **Type** | **Organizational Structure** | **Distribution** | **Guarantees**     | **Semantics**    |
+|--------------------|-----------|----------|------------------------------|------------------|--------------------|------------------|
+| Local Filesystem   | Local     | File     | Hierarchical                 | Centralized      | Strong consistency | File descriptors |
+| AWS S3             | Remote    | Blob     | Flat                         | Distributed      | Strong consistency |                  |
+| Azure Blob Storage | Remote    | Blob     | Flat                         | Distributed      | Strong consistency |                  |
+| GCP GCS            | Remote    | Blob     | Flat                         | Distributed      | Strong consistency |                  |
+| Tar                | Local     | File     | Hierarchical                 | Centralized      | Strong consistency |                  |
+| Zip                | Local     | File     | Hierarchical                 | Centralized      | Strong consistency |                  |
+| HDF5               | Local     | File     | Hierarchical                 | Centralized      | Strong consistency | Metadata         |
+| SFTP               | Remote    | File     | Hierarchical                 | Centralized      | Strong consistency |                  |
+| Dropbox            | Remote    | File     | Hierarchical                 | Distributed      | Strong Consistency |                  |
+| Box                | Remote    | File     | Hierarchical                 | Distributed      | Strong Consistency |                  |
+| Google Drive       | Remote    | File     | Hierarchical                 | Distributed      | Strong Consistency |                  |
+
+: Data Storage System Classification {#tbl-classification}
+
+Now that we have a sense of how to talk about different storage systems and a mostly-complete listing of the types of stystems we would like our interface to support, we can enumerate the essential operations that the interface must provide.
 
 # Essential Operations
 
-While the particular requirements of our interface are important, there are a few broader principles to how it should be designed that we have mentioned already and that bears repeating. The overarching motivation for designing our file system library is to faciliate writing portable code. The guiding design principle is that the interface should be unsurprising. Said differently, the library should be easy to use, feel familiar, and just make sense. We will get to _how_ to achieve these goals in the implementation section, but for now we will zoom in one level and look at the broad set of requirements the interface must meet.
-
-Our brief exploration of storage systems surfaced three areas where storage systems differ that our library must abstract away: where the data are stored, how the data are stored, and how stored data are managed. Abstracting away these three sets of differences is the core requirement of our library. However, to make things more concrete, there are four categories of storage systems that we would like our library to support: local file storage managed by different operating systems, cloud-based blob storage, remote file systems, and file _formats_ that can be thought of as self-contained hierarchical file systems. A few common examples inldue zip files tarballs, and files stored using the hierarchical data format (HDF5). With these broader requirements in mind, we can now zoom in one more layer to the specific features that we would like the library to support.
-
-As we think about features, there are three ways to classify them: essential vs. optional, common vs. specific, and by the component, to which, they are associated. We will go through the essential and non-essential features for each of the components that our interface will manage: files, directories, and paths.
+Our goal of writing portable file management code coupled with the desire to adhere to the principal of least surprise will guide us in deciding what operations are essential to a generic filesystem interface. In a later [section](#ideal-interface), we will delve into more detail about the abstraction(s), to which, each operations should belong. For now, we will consider three core entities and the kinds of operations that are relevant to each: files, paths, and directories[^6].
 
 ## Files
 
@@ -56,70 +71,71 @@ There are the 4 essential file management operations:
 3. Write
 4. Delete
 
-This list may surprise you as it excludes some features that you may have expected:
+This list has a few notable omissions:
 
 1. Update
 2. Move
 3. Rename
 4. Copy
+5. Partial read
+6. Partial write
+7. Permissions management
+8. Metadata inspection
 
-These operations were left off because, although it may be less efficient, they can be accomplished using the four core operations. In particular, each of the noted non-essential operations can be achieved by reading the file's contents into a temporary location not managed by the interface, removing the old file, creating a new file, optionally manipulating the in-memory data, and then writing the data to the new file. While these operations are not technically essential, it would probably surprise most users to have them as core features. Given our guiding design principle, it would make sense to include these common, but non-essential, operations in our interface.
-
-There are two other common file manipulation features that we have left out thus far:
-
-1. Partial read
-2. Partial write
-
-As with the other non-essential features, you can achieve a similar behavior using the core operations. To partially read, you would need to read all data into a temporary location and then read the contents that you want from that location. Partial writes are similar, except that you would update the content outside of the file management interface before writing it back to a file using the interface. Not having the ability to perform partial reads and writes is likely also going to be surprising, which is a point in favor of including it in the core interface. However, not all storage systems natively support random access, which is an essential underlying operation for partially reading and writing to a file and therefore a mark against including these operations in the core interface. We will return to this decision later. 
+The first 4 operations were left off because each operation can be accomplished by reading file data into a temporary location, manipulating the data, createing a new file, writing the data to the new file, and deleting the old file. The next two can also be accomplished using the four essential operations, albeit following a slightly different recipe. Permissions management is a category of operations involving both inspecting and modifying which users and groups have which level of permission (read, write, etc.). Metadata inspection is another category of operations to do things like inspecting at the size of the file, last update time, created time, etc. While every storage system has some notion of permissions and metadata, the exact semantics vary. None of these 6 operations are strictly essential, but it would probably surprise most users to exclude them from the interface. In deference to the principle of least surprise, we will need to include them in the interface.
 
 ## Directories
 
-Directory management is essential for hierarchical storage systems, but since not all storage systems are hierarchial, it should not be part of the core interface. We will think about this more in the implementation section, but for now it suffices to think of our file management interface as likely containing multiple layers of interfaces. The features that are both essential and common belong to the core interface. Directory management features belong to the interface shared by all _hierarchical_ storage systems. For such systems, there are three essential operations:
+Although not every storage system is hierarachical, all of the ones that we are considering provide users with the ability to work with directory-like entities and therefore, we we will consider which operations related to directory management are essential. We could consider defining a core interface and an optional interface specific to hierarchical storage systems, but we will consider that an implementation detail and defer further discussion to [later](#ideal-interface).
+
+There are three essential directory management operations:
 
 1. Create
 2. Read (list contents)
 3. Delete (can be recursive)
 
-Much like for file manipulation, there are a few not-technically-essential operations that should probably be part of the standard interface:
+This is the same set of essential operations as file management, except for the update operation, which is unnecessary. Since directories are simply containers for files and other directories, updating happens via operations to the sub-directories and files inside of the directory. Much like for file manipulation, there are also a few non-essnetial operations: 
 
 1. Move
 2. Copy
 
-To keep the interface for hierarchical storage systems unsurprising, it is probably best for us to include these operations in the interface.
+To avoid unnecessary surprises, these will also need to be included in the interface.
 
 ## Path
 
-A path is the location of a file in filesystem. Interestingly, you can make the case that there are no essential features for paths since they can be represented with a standard type (e.g. string) in most programming languages. There are any number of nice-to-have features that one might imagine being associated with a path: extracting relevant parts (extension, file name, etc), combining, standdarding, and more. However, we will defer any more details until after exploring how different programming languages handle paths, as well as other abstractions related to file management, in the following section.
+The last core entity we will consider is a path, which we defined previously as the location of a file in a filesystem. In most programming languages, paths can be represented by a string (or equivalent data type), which means that they are not strictly a core entity. Unfortunately, the principle of least surprise does not offer concrete guidance. Whether or not a user expects paths to have dedicated operations likely depends on their past experience manipulating paths in one or more programming languages. For the purposes of this section, we will assume that users expect certain convenience operations that operate on paths and defer a decision about whether to include them as part of a separate entity to [later](#ideal-interface).
+
+There are 4 convenience operations for either inspecting or manipulating paths that I anticipate most users would expect:[^7] 
+
+1. Inspect individual components (stem, root, filename, etc.)
+2. Parse into or iterate over path components
+3. Join two or more paths
+4. Normalize/Standardize/Canonicalize
+
+Now that we have covered the eseential operations for our three core entities, we can start to get a sense of how we might design our interface by looking at the design of file management libraries provided by different programming languages.
 
 # Prior Art
 
-As we turn our attention away from what operations our interface should support to how the interface should be designed, it will be instructive to look at how other similar libraries have been designed. One thing we will see is that programming languages provide widely varying interfaces for interacting with local files. For each of the programming languages we consider, we will be focusing on three essential questions:
+In this section, we will take a brief tour of file management interfaces in Rust, NodeJS, Go, and Python. While this list is far from exhaustive, the standard and third-party file management libraries available across these langauges provide an informative set of contrasts that illuminate many of the critical considerations involved in designing a generic file management interface. To guide our exploration, we will focus on the following questions:
 
-1. What are the main abstractions provided by the interface?
-2. What operations are available and with which abstraction are they associated?
-3. What are the design considerations surfaced by the implementation?
-
-At the end of the tour, we will have surfaced both a menu of implementation options and identified some of the core decisions that go into designing a file management interface.
+1. How are the file management related components organized?
+2. What core abstractions does the library provide?
+3. How are these abstractions related to one another?
+4. To which abstraction(s) are the essential operations associated?
+5. What design decisions does the interface surface?
+6. How are these design decisions related to the ones made in other libraries?
 
 ### Rust
 
-The rust standard library provides the [`std::fs`](https://doc.rust-lang.org/std/fs/index.html#) module for performing file system manipulations and the [`std::path`](https://doc.rust-lang.org/std/path/index.html) module for working with paths.
+File management operations in the Rust standard library are limited to OS files and are split among two modules: [`std::fs`](https://doc.rust-lang.org/std/fs/index.html#) and [`std::path`](https://doc.rust-lang.org/std/path/index.html). These modules contain two core abstractions (`Path` and `File`) and one implicit abstraction (filesystem) implemented as a set of operations associated with the `fs` module.
 
-A [`std::path::Path`](https://doc.rust-lang.org/beta/std/path/struct.Path.html) is an immutable reference to a file in the underlying file system. It can be constructed from a string, abstracts over differences between Unix and Windows path representations, and provides helpful methods for both inspecting information about the path and its components. The abstraction does _not_ provide any methods for manipulating the underlying file. However, it does provide a number of methods that result in calls to the underlying operating system to inspect the referenced file:
+A [`std::path::Path`](https://doc.rust-lang.org/beta/std/path/struct.Path.html) is an immutable reference to an OS file. It can be constructed from a string, abstracts over differences between Unix and Windows path representations, and provides all of the 4 essential operations for both manipulating the path and inspecting its components.
 
-- `exists`
-- `is_dir`
-- `is_file`
-- `is_symlink`
-- `metadata`
-- `read_dir`
-- `read_link`
-- `symlink_metadata`
-- `try_exists`
+While the `Path` interface does not provide any methods for _manipulating_ the underlying file, it does provide a number of methods for _inspecting_ it, all of which result in calls to the operating system (e.g. `exists`, `is_dir`, and `read_link` to name just a few). Although these methods are convenient, they go against the implementation implied by our definition, in which a path had no management responsibilities or knowledge of the file it references.
 
-While these methods are convenient, they go against the implementation implied by our definition, in which a path had no responsibilities or knowledge of the referenced file. The definition implies that these actions fall under the purview of the file system, not a path. This brings us to our first design consideration: the tradeoff between convenience and surprise. Strict conformity to the interfaces implied by the definitions results in a less surpising interface. However, this comes at the expense of convenience as it may require more entities (e.g. path and file system) to perform an operation like checking if the file referenced by a path exists. The requirement that the interface be unsurprising does not preclude making some decisions in favor of convenience, but it does push us to favor a more strict conformity that maintains at least some distinction in responsibilities. Keeping this trade off in mind, let's get back to our exploration of how Rust solves the file management problem.
+The design of the `Path` interface in Rust brings us to our first design consideration: the tradeoff between convenience and surprise. The closer our interfaces stick to the definitions outlined earlier, the less surprising it will be. However, strict conformity to our definitions comes at the expense of convenience: switching between abstractions to perform operations is less convenient than performing the same set of operations using a single (or fewer) abstraction. While the requirement that the interface be unsurprising does not preclude making some decisions in favor of convenience, it does push us to favor fairly strict adherence to the definitions. We will see this tradeoff come up again and again as we continue our tour of file management interfaces.
 
-The [`std::fs`](https://doc.rust-lang.org/std/fs/index.html) serves as both a filesystem abstraction and container for other abstractions supporting file management. The module-level functions include operations for managing files, directories, and their associated permissions. While some of these operations are unique, others overlap with the methods attached to other abstractions. Only the filesystem abstraction includes operations for copying, renaming, and removing files. The `fs` module is also solely responsible for directory management operations. Both [`std::fs::File`](https://doc.rust-lang.org/beta/std/fs/struct.File.html) and `fs` have the ability to manage file data as well as permissions. The data manipulation functionality associated with `fs` is limited to entire contents of the file, whereas the `File` abstraction allows for reading and writing to aribtrary locations. There is also overlap in functionality between the `fs` module and the `Path` abstraction: `canonicalize`, `try_exists`, `read_link`, `read_dir`, and `symlink_metadata` are all equivalent operations available through both abstractions.
+The [`std::fs`](https://doc.rust-lang.org/std/fs/index.html) module serves as both a filesystem abstraction and container for other abstractions supporting file management. The module-level functions include operations for managing files, directories, and their associated permissions. While some of these operations are unique, others overlap with the methods attached to other abstractions. Only the `fs` module includes operations for copying, renaming, and removing files. It is also the module solely responsible for directory management operations. Both [`std::fs::File`](https://doc.rust-lang.org/beta/std/fs/struct.File.html) and `fs` have the ability to manage file data as well as permissions. The data manipulation functionality associated with `fs` is limited to entire contents of the file, whereas the `File` abstraction allows for reading and writing to aribtrary locations. There is also overlap in functionality between the `fs` module and the `Path` abstraction: `canonicalize`, `try_exists`, `read_link`, `read_dir`, and `symlink_metadata` are all equivalent operations available through both abstractions.
 
 Our exploration of the file management abstractions in Rust raises our second design consideration: to what extent should different abstractions have overlapping operations? On the one hand, strict adherence to our definitions of files, paths, and filesystems suggests that each has distinct, non-overlapping operations. On the other, having overlapping functionality may simplify certain tasks by requiring fewer abstractions. This is reminiscent of the convenience vs. surprise tradeoff noted earlier, but we will treat it as a separate consideration because it is a more specific instance of that broader consideration.
 
@@ -169,7 +185,7 @@ The various third-party libraries for file management in python raise a few inte
 
 ## Data Storage Taxonomy
 
-There are 5 key differentiators between storage systems:
+There are 4 key differentiators between storage systems:
 
 1. Where data are stored
     - local vs. remote
@@ -177,9 +193,9 @@ There are 5 key differentiators between storage systems:
     - block vs. object vs. file
     - flat vs. hierarchical
     - centralized vs. distributed
-4. Guarantees
+3. Guarantees
     - strong vs. eventual consistency
-5. Semantics
+4. Semantics
     - file descriptors
 
 [^1]: There are a bunch of variations in how to write out "filesystem". The three most common are `file system`, `file-system`, and `filesystem`. I've opted to use `filesystem` as I think it is the most readable.
@@ -211,3 +227,5 @@ There are 5 key differentiators between storage systems:
 [^3]: There are different levels to the notion of where data are stored, but we are interested in only this high-level distinction between local versus remote.
 [^4]: The portable operating system interface (POSIX) defines a set of standards to encourage interoperability between operating systems. POSIX defines a hierarchical filesystem and associated API for managing files. Both Windows and at least some Unix-based systems are not fully POSIX compliant, which means that not every local filesystem has the same guarantees and semantics as defined in the POSIX standards.
 [^5]: Unix or Unix-like
+[^6]: Although not all storage systems are hierarchical, directories are included in this list because all of the storage systems that we are interested in at least give the appearance of supporting directories.
+[^7]: Pythonistas will notice that this list is heavily influence by the interface for [`pathlib.PurePath`](https://docs.python.org/3/library/pathlib.html#pure-paths), which betrays my own background primarily writing code in Python.
