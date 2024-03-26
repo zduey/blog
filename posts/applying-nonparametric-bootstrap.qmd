@@ -1,0 +1,101 @@
+---
+title: Quantifying Uncertainty Using the Nonparametric Bootstrap 
+author: Zach Duey
+date: 3/26/2024
+categories:
+    - statistics
+    - machine learning
+---
+
+I love the bootstrap. More specifically, I love the non-parametric bootstrap. I may love it too much. It is the most commonly used non-standard tool in my applied statistics toolbox. In this post, I'll briefly explain the bootstrap procedure and how I have used it to quantify uncertainty in various real-world problems. This post is neither a tutorial on the procedure nor an exhaustive list of use cases. My goal is simple: convince you that the bootstrap is a tool you should have in your toolbox by describing some real-world applications.
+
+# Background
+
+The bootstrap is a procedure introduced in [Efron (1976)](https://www.jstor.org/stable/2958830) for estimating the sampling distribution of a random variable by repeatedly sampling with replacement from available data. The beauty of the procedure lies in its broad applicability and surprising simplicity.
+
+The bootstrap procedure is widely applicable for practitioners because it can quantify uncertainty. Uncertainty quantification is a broad topic well beyond the scope of this post, so we will start by honing in on how the bootstrap procedure can solve a central problem in frequentist statistics: estimating the sampling distribution of a random variable. In textbook examples, sampling distributions often follow well-known probability distributions (e.g., Gaussian, Student's t, etc.). However, the sampling distributions encountered in practice can be cumbersome to identify or challenging to derive. Therefore, a procedure that allows practitioners to approximate virtually any sampling distribution is immensely valuable.
+
+The bootstrap procedure’s conceptual simplicity is due to its taking the ideas underlying statistical inference to their logical extreme. If you understand statistical inference, then there is no additional conceptual burden to understanding the bootstrap. The bootstrap is even sometimes used to teach statistical inference.
+
+Statistical inference is the process of using a sample of data to learn something about the population from which the sample originated. Inference starts with defining a statistic, a measure computed from the sample data. This statistic captures something of interest about the population. For example, you may want to know about the birth weight of babies born in the United States. Since it would be prohibitive to get accurate birth weight measurements for all babies born in the US, we may choose to collect measurements for a sample of babies. We compute the average birth weight within this sample to learn something about the average birth weight in the population. In this example, average birth weight is the statistic. Since our sample is just one of many possible samples, any statistic we compute is a random variable. Therefore, to make inferences about the population, we need to pin down some properties of this random variable. The fundamental challenge is that we only have access to a single sample. However, we can imagine running this same experiment many times. This hypothetical resampling leads to the idea of a sampling distribution. Depending on how the statistic is defined and other assumptions we make, we can often derive properties of this sampling distribution that support inferential tasks. This idea of resampling is the bridge between statistical inference and the bootstrap, which we can now discuss.
+
+The bootstrap procedure come from a straightforward idea: resample from the sample data as if the sample is the full population. This technique allows us to approximate the sampling distribution directly instead of deriving its properties via a thought experiment. As long as the sample is reasonably large and representative of the population, the approximation should be good enough. The simplest version of the procedure is just five steps:
+
+1. Define a statistic of interest
+2. Sample with replacement from the data
+3. Compute the statistic from (1) using the bootstrap sample (2)
+4. Repeat steps 2 and 3 many times
+5. Compute whatever you want from the results of 2-4
+
+The canonical use case for the bootstrap is estimating standard errors. A standard error is the standard deviation of a sampling distribution. In our birth weight example, the standard error quantifies the uncertainty associated with using the average birth weight in our sample to approximate the fixed but unknown average birth weight in the unobserved population. Since this is the application that most people are familiar with, we will focus most of our attention on some other, less common applications involving predictive modeling and related decision problems. Let's dive in!
+
+# Applications
+
+In the remainder of this post, I will outline three additional ways I have used the bootstrap procedure. To keep the discussion grounded, I will use a case study that closely mirrors an actual project I have worked on. Many of these applications build on one another, so I do not recommend skipping ahead. While far from exhaustive, these examples will ideally spark some ideas about how you could apply the procedure.
+
+Imagine that you asked to improve the efficiency of your employer's customer acquisition process. The company has a list of prospective customers. Each day, this list is handed off to a call center. The call center representatives attempt to contact each individual on the list from top to bottom. The list is long enough that it takes many days to multiple weeks to contact everyone. If the represented cannot reach the prospective customer, the customer is removed from the call list.  If the representative is able to reach the prospective customer, the representative asks them a few questions to determine if they are eligible to receive your company’s services. Some of these individuals will not be eligible. Some eligible individuals will opt out of receiving services. Notably, the company can only provide services to a limited number of individuals. Your employer maximizes revenue when operating at capacity and revenue quickly declines if over or under-utilized. Your task is to help maximize revenue, but the only lever you have available is the order of the individuals on the contact list. There are several ways to solve this problem, but we will focus on a predictive model-based solution.
+
+Let's assume that you have decided to develop a binary classifier that predicts if a prospective customer is eligible to receive services. Although eligibility does not guarantee that the individual will elect to receive services, it is a prerequisite. You plan to use the predicted probabilities generated by the model to re-order the list so that the most likely to be eligible individuals are at the top. If the model is effective, then the company should be able to achieve higher revenue.
+
+## How well will this model perform on unseen data?
+
+An essential task when developing a predictive model is understanding how well it is likely to perform on unseen data; in other words, estimating the model’s expected generalization error. The bootstrap procedure can quantify the uncertainty associated with this measure. Before delving into the specifics of this technique, it is valuable to explore a common approach to model evaluation. These details will be important later in our discussion.
+
+At the start of the model development process, you partition the available data into multiple subsets. Whether you choose to do two or three partitions is irrelevant; the result is that you hold out some of the data until after model comparison and selection are complete. You can then use the held-out data to estimate expected generalization error.
+
+You may be wondering why we need the bootstrap procedure. Why can’t we just calculate model performance on the held-out data? We can! But, the key thing to realize is that model performance computed on the held-out data is not a fixed quantity but a random variable. It is a random variable for the same reason that any statistic computed on a sample of data is a random variable; the observed sample, in this case, the data available for training, is just one of many possible samples. As with traditional statistical inference, we would like to estimate the sampling distribution of this statistic, which is exactly what the bootstrap procedure can do. In essence, it is a way to quantify the uncertainty with our measure of expected generalization error. The core of the procedure is just four steps:
+
+1. Select a model performance metric
+2. Draw a sample with replacement from the held-out data
+3. Compute (1) using the data from (2)
+4. Repeat 2-3 many times
+
+At the end of this process, we have a measure of out-of-sample performance across many bootstrap samples. We can use this data in a few ways. First, we can plot a histogram of these performance metrics to visualize the empirical sampling distribution. Second, if this sampling distribution is approximately normal, we can generate confidence intervals for the performance metric using the 5th and 95th percentiles of the performance metric across our bootstrap samples. Third, we can compute the standard deviation of these values to estimate the standard error for the expected generalization error. We could do other things, but these are at least some of the main ones.
+
+Astute readers will have noticed something different about this bootstrap application relative to traditional inference. In this application, we have two sources of uncertainty. We have the typical source of uncertainty arising from the sample data being just one of infinitely many possible samples we could have observed. However, we also have a second source of uncertainty due to the partitioning performed at the start of the model development process. If the randomization had been different (e.g., using a different seed), these partitions would have contained different observations, which impacts all downstream model development steps.
+
+The bootstrap procedure described above does not account for the uncertainty due to random partitioning, so it underestimates the overall uncertainty associated with our estimate of expected generalization error. We could account for this variation by wrapping our data splitting, data processing, model training, evaluation, and selection pipeline into a bootstrap procedure. In the end, the confidence intervals for our performance metric account for both sources of uncertainty. While this nested bootstrap procedure is undoubtedly a better way to capture the relevant uncertainty, I don't typically go this extra step. The main reason is practical; for anything beyond a toy dataset, the computational cost and complications of bootstrapping the whole model development process outweigh the benefits of better-capturing uncertainty.
+
+## Which model is better?
+
+In our second non-standard bootstrap application, we will take a step back in the model development lifecycle and to use it for model comparison. The idea is simple: if you can use the bootstrap procedure to better understand a single model's performance, why not use it to compare models?
+
+The bootstrap procedure for model comparison is nearly identical to the one for model evaluation, with a few slight tweaks. First, you should use either the validation or training data. If you created three partitions, then you will use the validation data. Otherwise, you will use the training data. The held-out data should be reserved until you are ready to decide about moving the selected model to production. Second, you must evaluate the models on identical bootstrap samples. Resist the temptation to generate independent bootstrap samples and evalute the models separately. Unless you are exceptionally careful with setting up the seeds, the bootstrap samples will be different, making the comparison invalid. Third, you must train both models on the same data. 
+
+As a practical matter, I find it helpful to designate the more complex model as the “challenger” and the simpler one as the “benchmark.” While there is no perfect way to measure model complexity, a general gut sense based on model flexibility, number of hyperparameters, and number of input features is sufficient. By framing model comparison this way, simpler models are the default preference. The actual process is just five steps:
+
+1. Select a performance metric
+2. Draw a sample with replacement (validation data if available otherwise training)
+3. Compute performance for each model using data from (2)
+4. Compute the difference in performance between the models using (3)
+5. Repeat 2-4 many times
+
+At the end of this procedure,  there is a sequence of model performance metrics for each model as well as a third sequence that captures the difference between them. We can plot a histogram of these metrics and their difference. I typically overlay a vertical line at zero on top of the performance difference histogram. If you or your colleagues insist on turning this data into a hypothesis test, it is straightforward. Assume that you are interested in the null hypothesis that the benchmark model performs equally well as the challenger. The test statistic is the number of times that the difference between the challenger and benchmark was greater than zero. You can get a p-value by dividing this test statistic by the number of bootstrap samples. It is up to you if and how you want to use this p-value. I dare not trudge into that debate, but suffice it to say that I do not bother looking at p-values. Instead, I find it is sufficiently informative to look at the histogram of the difference in performance. Ultimately, the decision about whether the challenger is sufficiently better than the benchmark is a decision-theoretic one that is highly context-dependent. We will delve a little deeper into that realm with our next application.
+
+## Should I deploy this model?
+
+Our third application uses the bootstrap procedure to quantify the uncertainty associated with estimating the expected value to the business of deploying the model to production. This application builds on the first, where we used the bootstrap to quantify the uncertainty associated with expected generalization error. It also builds on the second application in that you evaluate the the expected value of the model relative to the current solution, which is essential model comparison. The current solution could be a rules-based algorithm, predictive model, or anything else, so long as you can use it to derive comparable performance metrics.
+
+We have now moved firmly away from traditional predictive modeling and evaluation into the realm of decision science. At a high level, there are two steps. First, a variant of the model comparison bootstrap technique discussed previously is be used to compare the candidate (challenger) solution to the current solution (benchmark). Second, those performance differences are converted into a dollar value. The overall procedure is again just five steps:
+
+1. Specify the costs and benefits of each prediction outcome
+2. Draw a sample with replacement from the held-out data
+3. Compute the difference in performance between the challenger and benchmark 
+4. Compute the net benefit of the challenger relative to the current solution
+5. Repeat 2-4 many times
+
+Although we are using the procedure to compare two models as in the previous application, we are not using the results for model selection, which means we can use the held-out data. The other reason to use the held-out data is that it provides a fairer comparison since the current solution was likely  trained different data than he challenger. This way, the evaluation is out of sample for both the benchmark and challenger.
+
+The second step requires aome additional assumptions. Remember that in our running example, we are evaluating a binary classifier, so to estimate the expected value of deploying this model, we need to assign a dollar value to each of the four prediction outcomes: true positives, false positives, true negatives, and false negatives. Then, the math is pretty simple: take a weighted sum of the elements of the confusion matrix and their associated value. Do this for both the challenger and current solution and take their difference to arrive at the added value of the challenger solution. We can leverage these results across the bootstrap samples to get a sense of the uncertainty of our estimate. As a practical matter, because this evaluation requires some additional assumptions, I usually perform a sensitivity analysis. This sensitivity analysis requires repeating the evaluation over a range of plausible parameter values (cost/benefit assumptions). 
+
+# Conclusion
+
+In this post, we looked at three ways to apply the nonparametric bootstrap in the model development process. These three applications tried to address the following three questions:
+
+1. How well will this model perform on unseen data?
+2. Which model is better?
+3. Should I deploy this model?
+
+One theme underlying this discussion is that the nonparametric bootstrap is useful for quantifying uncertainty. Most commonly, the procedure is used to estimate the standard deviation of a sampling distribution, which is just a way of quantifying uncertainty associated with a parameter estimate (e.g., average birth weight in the US). Our first application used the procedure to quantify uncertainty when estimating expected generalization error. The second application used the bootstrap for model comparison: quantifying the uncertainty associated with estimating the difference in model performance. The final application quantified the uncertainty related to estimating the expected benefit of deploying a challenger model relative to the current solution.
+
+Although the bootstrap procedure has limitations, uncertainty quantification is an area where it can shine. Incorporating these different sources of uncertainty means that the decision is not as clear-cut as standard techniques that generate point estimates. But that’s kind of the point, isn’t it? The model development lifecycle isn’t always straightforward and linear in the real world. In the face of uncertainty, we can ignore it or incorporate it into our decision-making. Hopefully, this post has given you some ideas about how to do the latter using the nonparametric bootstrap procedure!
