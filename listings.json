@@ -2,6 +2,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/applying-nonparametric-bootstrap.html",
       "/posts/courage-to-ask.html",
       "/posts/econometrics-for-data-scientists.html",
       "/posts/intro-bayesian-statistics-presentation.html",

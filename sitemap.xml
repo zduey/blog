@@ -1,55 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://www.zduey.github.io/posts/10000-lines-of-code.html</loc>
-    <lastmod>2023-12-11T01:44:13.226Z</lastmod>
-  </url>
-  <url>
-    <loc>https://www.zduey.github.io/posts/intro-bayesian-statistics-presentation.html</loc>
-    <lastmod>2023-12-11T01:44:11.750Z</lastmod>
-  </url>
-  <url>
-    <loc>https://www.zduey.github.io/posts/2017-retrospective-2018-goals.html</loc>
-    <lastmod>2023-12-11T01:44:11.218Z</lastmod>
-  </url>
-  <url>
-    <loc>https://www.zduey.github.io/posts/streaming-stock-data-with-bokeh.html</loc>
-    <lastmod>2023-12-11T01:44:10.406Z</lastmod>
-  </url>
-  <url>
-    <loc>https://www.zduey.github.io/posts/app-deployment-with-heroku.html</loc>
-    <lastmod>2023-12-11T01:44:09.678Z</lastmod>
+    <loc>https://www.zduey.github.io/blog.html</loc>
+    <lastmod>2024-03-26T17:06:58.936Z</lastmod>
   </url>
   <url>
     <loc>https://www.zduey.github.io/about.html</loc>
-    <lastmod>2023-12-11T01:44:08.498Z</lastmod>
+    <lastmod>2024-03-26T17:06:58.936Z</lastmod>
   </url>
   <url>
-    <loc>https://www.zduey.github.io/blog.html</loc>
-    <lastmod>2023-12-11T01:44:07.710Z</lastmod>
-  </url>
-  <url>
-    <loc>https://www.zduey.github.io/index.html</loc>
-    <lastmod>2023-12-11T01:44:08.226Z</lastmod>
-  </url>
-  <url>
-    <loc>https://www.zduey.github.io/posts/ssh-server-on-home-computer.html</loc>
-    <lastmod>2023-12-11T01:44:09.102Z</lastmod>
-  </url>
-  <url>
-    <loc>https://www.zduey.github.io/posts/2016-retrospective-2017-goals.html</loc>
-    <lastmod>2023-12-11T01:44:10.010Z</lastmod>
+    <loc>https://www.zduey.github.io/posts/10000-lines-of-code.html</loc>
+    <lastmod>2024-03-26T17:06:58.944Z</lastmod>
   </url>
   <url>
     <loc>https://www.zduey.github.io/posts/funnel-method.html</loc>
-    <lastmod>2023-12-11T01:44:10.750Z</lastmod>
+    <lastmod>2024-03-26T17:06:58.944Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.zduey.github.io/posts/intro-bayesian-statistics-presentation.html</loc>
+    <lastmod>2024-03-26T17:06:58.944Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.zduey.github.io/posts/2017-retrospective-2018-goals.html</loc>
+    <lastmod>2024-03-26T17:06:58.944Z</lastmod>
   </url>
   <url>
     <loc>https://www.zduey.github.io/posts/econometrics-for-data-scientists.html</loc>
-    <lastmod>2023-12-11T01:44:11.486Z</lastmod>
+    <lastmod>2024-03-26T17:06:58.944Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.zduey.github.io/posts/streaming-stock-data-with-bokeh.html</loc>
+    <lastmod>2024-03-26T17:06:58.944Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.zduey.github.io/posts/2016-retrospective-2017-goals.html</loc>
+    <lastmod>2024-03-26T17:06:58.944Z</lastmod>
   </url>
   <url>
     <loc>https://www.zduey.github.io/posts/courage-to-ask.html</loc>
-    <lastmod>2023-12-11T01:44:12.838Z</lastmod>
+    <lastmod>2024-03-26T17:06:58.944Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.zduey.github.io/posts/ssh-server-on-home-computer.html</loc>
+    <lastmod>2024-03-26T17:06:58.944Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.zduey.github.io/posts/app-deployment-with-heroku.html</loc>
+    <lastmod>2024-03-26T17:06:58.944Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.zduey.github.io/posts/applying-nonparametric-bootstrap.html</loc>
+    <lastmod>2024-03-26T17:06:58.944Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.zduey.github.io/index.html</loc>
+    <lastmod>2024-03-26T17:06:58.936Z</lastmod>
   </url>
 </urlset>
